@@ -1,0 +1,282 @@
+{
+ "contract_version": "1.0.0",
+ "domain": "housing",
+ "model_version": "V10",
+ "generated_at_utc": "2026-10-08T12:40:31+00:00",
+ "source_repository": "dlockar1mtg/HousingIntelligencePlatform",
+ "source_commit": "86471644c391b691f0e94dcecf3c1f4919f10e57",
+ "source_run_id": "37773740425",
+ "certification_status": "PROVISIONAL",
+ "data_freshness": {
+  "Zillow ZHVI": "2026-08-31",
+  "Zillow ZORI": "2026-08-31",
+  "Realtor Inventory": "2026-09-01"
+ },
+ "latest_input_observation": "2026-09-01",
+ "markets": [
+  {
+   "market": "Wichita Composite",
+   "market_state_as_of": "2025-06-30",
+   "months_behind_latest_input": 15,
+   "market_regime": "Neutral / Transition",
+   "entry_score": 49.882,
+   "signal": "Neutral / Fair Value",
+   "market_rank": 1,
+   "market_ranking_score": 58.263,
+   "hpi": 299.17,
+   "hpi_yoy": 0.028358311563316363,
+   "predicted_12m_growth": 0.02975,
+   "realized_growth_for_that_period": 0.0453922518969147,
+   "forecast_confidence": 78.3,
+   "walk_forward_mae": 0.0217,
+   "mortgage_30yr": 6.788,
+   "zillow_zhvi": 196573.0,
+   "payment_to_income_ratio": 0.1738,
+   "calibration": {
+    "status": "FAIL",
+    "correlation": -0.02,
+    "rank_correlation": 0.02,
+    "in_sample": true
+   },
+   "best_window": {
+    "months": 36,
+    "expected_entry_score": 54.215,
+    "prob_neutral_or_better": 0.8145,
+    "prob_slight_buy_or_better": 0.1935
+   },
+   "outlook": [
+    {
+     "months": 0,
+     "entry_score_median": 52.66,
+     "entry_score_p10": 51.22,
+     "entry_score_p90": 55.03,
+     "growth_p10": 0.02951,
+     "growth_mean": 0.03367,
+     "growth_p90": 0.05018,
+     "mortgage_mean": 6.788,
+     "prob_neutral_or_better": 0.998
+    },
+    {
+     "months": 6,
+     "entry_score_median": 53.36,
+     "entry_score_p10": 49.13,
+     "entry_score_p90": 57.04,
+     "growth_p10": 0.02943,
+     "growth_mean": 0.03376,
+     "growth_p90": 0.0501,
+     "mortgage_mean": 6.695,
+     "prob_neutral_or_better": 0.9645
+    },
+    {
+     "months": 12,
+     "entry_score_median": 54.01,
+     "entry_score_p10": 48.73,
+     "entry_score_p90": 58.83,
+     "growth_p10": 0.0295,
+     "growth_mean": 0.03425,
+     "growth_p90": 0.05035,
+     "mortgage_mean": 6.591,
+     "prob_neutral_or_better": 0.936
+    },
+    {
+     "months": 18,
+     "entry_score_median": 54.38,
+     "entry_score_p10": 48.12,
+     "entry_score_p90": 59.94,
+     "growth_p10": 0.02936,
+     "growth_mean": 0.03459,
+     "growth_p90": 0.05067,
+     "mortgage_mean": 6.459,
+     "prob_neutral_or_better": 0.9055
+    },
+    {
+     "months": 24,
+     "entry_score_median": 54.66,
+     "entry_score_p10": 46.76,
+     "entry_score_p90": 60.77,
+     "growth_p10": 0.02932,
+     "growth_mean": 0.03504,
+     "growth_p90": 0.05116,
+     "mortgage_mean": 6.364,
+     "prob_neutral_or_better": 0.859
+    },
+    {
+     "months": 30,
+     "entry_score_median": 54.43,
+     "entry_score_p10": 46.1,
+     "entry_score_p90": 61.48,
+     "growth_p10": 0.02911,
+     "growth_mean": 0.03633,
+     "growth_p90": 0.05162,
+     "mortgage_mean": 6.264,
+     "prob_neutral_or_better": 0.834
+    },
+    {
+     "months": 36,
+     "entry_score_median": 54.41,
+     "entry_score_p10": 45.15,
+     "entry_score_p90": 62.7,
+     "growth_p10": 0.02891,
+     "growth_mean": 0.04004,
+     "growth_p90": 0.05319,
+     "mortgage_mean": 6.144,
+     "prob_neutral_or_better": 0.8145
+    }
+   ],
+   "trigger": {
+    "next_signal": "Slight Buy",
+    "points_needed": 10.12,
+    "mortgage_rate_drop_needed": 2.53,
+    "plain_english": "Wichita Composite needs about 10.1 more entry-score points to reach Slight Buy. That could roughly come from a 2.53 point mortgage-rate drop, a 84.3% inventory-growth improvement, or a combination.",
+    "heuristic": true
+   },
+   "alerts": [
+    {
+     "severity": "Medium",
+     "type": "Fair Value",
+     "message": "Wichita Composite has reached Neutral/Fair Value."
+    },
+    {
+     "severity": "Informational",
+     "type": "Projected Opportunity Window",
+     "message": "Wichita Composite first meaningful improvement: 12 months."
+    }
+   ]
+  },
+  {
+   "market": "DFW Composite",
+   "market_state_as_of": "2025-06-30",
+   "months_behind_latest_input": 15,
+   "market_regime": "Neutral / Transition",
+   "entry_score": 45.624,
+   "signal": "Slight Wait",
+   "market_rank": 2,
+   "market_ranking_score": 50.794,
+   "hpi": 414.9415,
+   "hpi_yoy": 0.009040085209034432,
+   "predicted_12m_growth": 0.00719,
+   "realized_growth_for_that_period": 0.005736953281366,
+   "forecast_confidence": 71.02,
+   "walk_forward_mae": 0.029,
+   "mortgage_30yr": 6.788,
+   "zillow_zhvi": 278708.0,
+   "payment_to_income_ratio": 0.1893,
+   "calibration": {
+    "status": "PASS",
+    "correlation": 0.256,
+    "rank_correlation": 0.437,
+    "in_sample": true
+   },
+   "best_window": {
+    "months": 36,
+    "expected_entry_score": 47.538,
+    "prob_neutral_or_better": 0.4865,
+    "prob_slight_buy_or_better": 0.035
+   },
+   "outlook": [
+    {
+     "months": 0,
+     "entry_score_median": 46.17,
+     "entry_score_p10": 42.93,
+     "entry_score_p90": 48.2,
+     "growth_p10": 0.00485,
+     "growth_mean": 0.00763,
+     "growth_p90": 0.00869,
+     "mortgage_mean": 6.788,
+     "prob_neutral_or_better": 0.122
+    },
+    {
+     "months": 6,
+     "entry_score_median": 46.75,
+     "entry_score_p10": 41.51,
+     "entry_score_p90": 50.73,
+     "growth_p10": 0.00482,
+     "growth_mean": 0.00754,
+     "growth_p90": 0.00851,
+     "mortgage_mean": 6.672,
+     "prob_neutral_or_better": 0.3535
+    },
+    {
+     "months": 12,
+     "entry_score_median": 47.25,
+     "entry_score_p10": 41.19,
+     "entry_score_p90": 52.09,
+     "growth_p10": 0.00496,
+     "growth_mean": 0.00793,
+     "growth_p90": 0.00882,
+     "mortgage_mean": 6.579,
+     "prob_neutral_or_better": 0.4335
+    },
+    {
+     "months": 18,
+     "entry_score_median": 47.35,
+     "entry_score_p10": 40.56,
+     "entry_score_p90": 53.16,
+     "growth_p10": 0.00478,
+     "growth_mean": 0.00842,
+     "growth_p90": 0.00932,
+     "mortgage_mean": 6.45,
+     "prob_neutral_or_better": 0.454
+    },
+    {
+     "months": 24,
+     "entry_score_median": 47.73,
+     "entry_score_p10": 39.64,
+     "entry_score_p90": 53.88,
+     "growth_p10": 0.00456,
+     "growth_mean": 0.0086,
+     "growth_p90": 0.00967,
+     "mortgage_mean": 6.361,
+     "prob_neutral_or_better": 0.4845
+    },
+    {
+     "months": 30,
+     "entry_score_median": 47.69,
+     "entry_score_p10": 38.88,
+     "entry_score_p90": 54.2,
+     "growth_p10": 0.00438,
+     "growth_mean": 0.01055,
+     "growth_p90": 0.02789,
+     "mortgage_mean": 6.278,
+     "prob_neutral_or_better": 0.4805
+    },
+    {
+     "months": 36,
+     "entry_score_median": 47.8,
+     "entry_score_p10": 38.47,
+     "entry_score_p90": 55.37,
+     "growth_p10": 0.00408,
+     "growth_mean": 0.01427,
+     "growth_p90": 0.02936,
+     "mortgage_mean": 6.173,
+     "prob_neutral_or_better": 0.4865
+    }
+   ],
+   "trigger": {
+    "next_signal": "Neutral / Fair Value",
+    "points_needed": 2.38,
+    "mortgage_rate_drop_needed": 0.59,
+    "plain_english": "DFW Composite needs about 2.4 more entry-score points to reach Neutral / Fair Value. That could roughly come from a 0.59 point mortgage-rate drop, a 19.8% inventory-growth improvement, or a combination.",
+    "heuristic": true
+   },
+   "alerts": [
+    {
+     "severity": "Informational",
+     "type": "Projected Opportunity Window",
+     "message": "DFW Composite first meaningful improvement: 6 months."
+    }
+   ]
+  }
+ ],
+ "known_issues": [
+  "MARKET_STATE_IS_LAST_QUARTER_WITH_A_REALIZED_TARGET",
+  "ALIAS_MATCHING_INCLUDES_UNRELATED_METROS",
+  "WALK_FORWARD_VALIDATION_OVERLAPS_TARGETS",
+  "CALIBRATION_IS_IN_SAMPLE"
+ ],
+ "warnings": [
+  "MARKET_STATE_OLDER_THAN_6_MONTHS: Wichita Composite, DFW Composite"
+ ],
+ "household": null,
+ "automatic_execution_authorized": false
+}
