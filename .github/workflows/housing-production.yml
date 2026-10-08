@@ -1,0 +1,103 @@
+name: Housing production
+# Weekly: refresh Zillow / Realtor.com / Census, run V10 on live FRED, build and validate the UIP contract,
+# publish it as the housing-production-<run> artifact, and keep the monitoring state in state/.
+on:
+  schedule:
+    - cron: "20 13 * * 0"     # Sunday 13:20 UTC (FRED, Zillow and Realtor.com update weekly to monthly)
+    - cron: "20 13 * * 1"     # Monday backup; skips when Sunday's run already published
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: housing-production
+  cancel-in-progress: false
+jobs:
+  produce:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skip a backup run when this week's run already published
+        id: gate
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$(date -u +%u)" = "1" ] && [ -f state/latest_contract.json ]; then
+            last=$(python3 -c "import json;print(json.load(open('state/latest_contract.json'))['generated_at_utc'][:10])")
+            if [ "$(( ($(date -u +%s) - $(date -u -d "$last" +%s)) / 86400 ))" -lt 2 ]; then echo "run=false" >> "$GITHUB_OUTPUT"; echo "::notice::published $last; backup run skipped"; exit 0; fi
+          fi
+          echo "run=true" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-python@v5
+        if: steps.gate.outputs.run == 'true'
+        with:
+          python-version: "3.11"
+          cache: pip
+      - if: steps.gate.outputs.run == 'true'
+        run: pip install -r requirements-dev.txt && python -m pytest -q
+      - name: Restore the market files
+        if: steps.gate.outputs.run == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            inputs/zhvi_metro.csv
+            inputs/zori_metro.csv
+            inputs/realtor_inventory.csv
+          key: housing-inputs-v1-${{ github.run_id }}
+          restore-keys: housing-inputs-v1-
+      - name: Refresh the market files (fail-safe) and Census income
+        if: steps.gate.outputs.run == 'true'
+        env:
+          CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
+        run: |
+          for f in zhvi_metro zori_metro realtor_inventory; do
+            [ -f inputs/$f.csv ] || gunzip -c baseline/v10-2026-09-13/inputs/$f.csv.gz > inputs/$f.csv   # first run: seed with the baseline
+          done
+          python -c "from data_sources.market_file_updater import refresh_market_files; refresh_market_files()"
+          python -c "from data_sources.census_loader import download_census_income; download_census_income()" || echo "::warning title=Census::refresh failed; the committed Census income files are used"
+          python - <<'PY'
+          import pandas as pd, sys
+          r = pd.read_csv("outputs/v10_data_freshness_report.csv")
+          for _, x in r.iterrows():
+              print(f"::notice title={x['dataset']}::{x['status']} latest {x['latest_observation']} Wichita {x['wichita_coverage']} DFW {x['dfw_coverage']}")
+          if not (r["wichita_coverage"].eq("PASS").all() and r["dfw_coverage"].eq("PASS").all()):
+              sys.exit("market coverage failed: not running the forecast")
+          PY
+      - name: Run V10 on live FRED
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          cp state/v9_monitoring_history.csv state/v9_monitoring_current_snapshot.csv outputs/
+          python run_forecast.py | tee forecast.log
+      - name: Build and validate the UIP contract
+        if: steps.gate.outputs.run == 'true'
+        run: python publish_uip.py --package uip-package | tee publish.log && echo "::notice title=Housing contract::$(tail -1 publish.log | cut -c1-400)"
+      - uses: actions/upload-artifact@v4
+        if: steps.gate.outputs.run == 'true'
+        with:
+          name: housing-production-${{ github.run_id }}
+          path: uip-package/
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.gate.outputs.run == 'true'
+        with:
+          name: housing-run-outputs-${{ github.run_id }}
+          path: |
+            outputs/
+            forecast.log
+          retention-days: 14
+      - name: Save the market files
+        if: steps.gate.outputs.run == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            inputs/zhvi_metro.csv
+            inputs/zori_metro.csv
+            inputs/realtor_inventory.csv
+          key: housing-inputs-v1-${{ github.run_id }}
+      - name: Commit the monitoring state
+        if: steps.gate.outputs.run == 'true' && github.ref == 'refs/heads/main'
+        run: |
+          cp outputs/v9_monitoring_history.csv outputs/v9_monitoring_current_snapshot.csv outputs/v10_data_freshness_report.csv state/
+          cp uip-package/housing_uip_contract.json state/latest_contract.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state
+          git diff --cached --quiet || git commit -m "Housing production $(date -u +%F)"
+          git push

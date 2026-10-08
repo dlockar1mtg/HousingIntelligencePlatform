@@ -15,8 +15,8 @@ Migrated from the local `HousingPredictorv6` project (V10) on 2026-10-07. See `d
 | 0–1 | Freeze V10 and import it unchanged | this repo |
 | 2 | Reproduce the V10 run of 2026-09-13 | offline test passes; online workflow `Reproduce the V10 baseline` |
 | 3 | Tests and CI | `Tests` workflow |
-| 4 | `housing_uip_contract.json` | next |
-| 5 | UIP consumer (Homestead) | next |
+| 4 | `housing_uip_contract.json` (`publication/`, `publish_uip.py`) and the weekly `Housing production` workflow | built |
+| 5 | UIP consumer (Homestead) | in the UIP repo |
 | V11 | Fix the issues in `docs/MODEL_LIMITATIONS.md` | after integration, with before/after evidence |
 
 ## Running
@@ -25,6 +25,7 @@ Migrated from the local `HousingPredictorv6` project (V10) on 2026-10-07. See `d
 pip install -r requirements-dev.txt
 python update_data.py      # Zillow, Realtor.com and Census refresh (needs CENSUS_API_KEY)
 python run_forecast.py     # V10: FRED download, model, Monte Carlo, decision tools, outputs/
+python publish_uip.py      # build and validate uip-package/ (contract + manifest)
 python -m pytest -q
 ```
 
