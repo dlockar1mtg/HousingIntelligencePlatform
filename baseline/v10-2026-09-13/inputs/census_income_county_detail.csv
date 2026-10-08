@@ -1,0 +1,16 @@
+year,date,fips,name,median_household_income,population,source,market,county
+2024,2024-12-31,20173,"Sedgwick County, Kansas",69365.0,528226.0,ACS 2024 5-year,Wichita Composite,Sedgwick KS
+2024,2024-12-31,20015,"Butler County, Kansas",81610.0,68287.0,ACS 2024 5-year,Wichita Composite,Butler KS
+2024,2024-12-31,20079,"Harvey County, Kansas",74368.0,33756.0,ACS 2024 5-year,Wichita Composite,Harvey KS
+2024,2024-12-31,20191,"Sumner County, Kansas",63951.0,22353.0,ACS 2024 5-year,Wichita Composite,Sumner KS
+2024,2024-12-31,48113,"Dallas County, Texas",76547.0,2621179.0,ACS 2024 5-year,DFW Composite,Dallas TX
+2024,2024-12-31,48439,"Tarrant County, Texas",84207.0,2167390.0,ACS 2024 5-year,DFW Composite,Tarrant TX
+2024,2024-12-31,48085,"Collin County, Texas",121600.0,1163337.0,ACS 2024 5-year,DFW Composite,Collin TX
+2024,2024-12-31,48121,"Denton County, Texas",111498.0,979561.0,ACS 2024 5-year,DFW Composite,Denton TX
+2024,2024-12-31,48397,"Rockwall County, Texas",127981.0,123617.0,ACS 2024 5-year,DFW Composite,Rockwall TX
+2024,2024-12-31,48257,"Kaufman County, Texas",89485.0,172604.0,ACS 2024 5-year,DFW Composite,Kaufman TX
+2024,2024-12-31,48139,"Ellis County, Texas",99595.0,213160.0,ACS 2024 5-year,DFW Composite,Ellis TX
+2024,2024-12-31,48251,"Johnson County, Texas",84859.0,195597.0,ACS 2024 5-year,DFW Composite,Johnson TX
+2024,2024-12-31,48367,"Parker County, Texas",104443.0,165168.0,ACS 2024 5-year,DFW Composite,Parker TX
+2024,2024-12-31,48497,"Wise County, Texas",93421.0,75005.0,ACS 2024 5-year,DFW Composite,Wise TX
+2024,2024-12-31,48231,"Hunt County, Texas",71938.0,108972.0,ACS 2024 5-year,DFW Composite,Hunt TX

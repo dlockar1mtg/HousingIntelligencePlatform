@@ -1,0 +1,20 @@
+# Secrets and personal data never enter the repository.
+config/settings.local.json
+inputs/personal_profile.json
+inputs/data_sources_config.json
+*.env
+.env
+
+# Downloaded market files live in the Actions cache (filtered baseline copies are in baseline/).
+inputs/zhvi_metro.csv
+inputs/zori_metro.csv
+inputs/realtor_inventory.csv
+inputs/backups/
+
+# Run products
+/outputs/
+/cache/
+/logs/
+__pycache__/
+*.pyc
+.pytest_cache/

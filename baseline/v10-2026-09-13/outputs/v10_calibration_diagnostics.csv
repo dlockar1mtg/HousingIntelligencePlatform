@@ -1,0 +1,3 @@
+market,observations,entry_score_future_growth_correlation,entry_score_future_growth_rank_correlation,mean_growth_below_neutral,mean_growth_neutral_or_better,decline_rate_below_neutral,decline_rate_neutral_or_better,calibration_pass
+DFW Composite,82,0.2574840595253309,0.43857816088201046,0.04324071496334319,0.05898219124635296,0.16666666666666666,0.10869565217391304,True
+Wichita Composite,82,-0.018933816540631206,0.01955790642243772,0.0396889345204967,0.03759691056053187,0.16216216216216217,0.15555555555555556,False

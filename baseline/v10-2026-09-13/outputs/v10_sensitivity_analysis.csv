@@ -1,0 +1,23 @@
+market,variable,shock,description,base_entry_score,estimated_entry_score_after_shock,estimated_score_impact,base_signal,estimated_signal_after_shock
+DFW Composite,payment_to_income_ratio,-0.04,Payment-to-income ratio improves by 4 points,45.84329268292683,50.64329268292683,4.8,Slight Wait,Neutral / Fair Value
+DFW Composite,mortgage_30yr,-1.0,Mortgage rate falls 1 percentage point,45.84329268292683,49.84329268292683,4.0,Slight Wait,Neutral / Fair Value
+DFW Composite,predicted_12m_growth,0.02,Expected appreciation improves by 2 percentage points,45.84329268292683,49.04329268292683,3.2,Slight Wait,Neutral / Fair Value
+DFW Composite,realtor_active_listings_yoy,0.2,Inventory growth improves by 20 percentage points,45.84329268292683,48.24329268292683,2.4000000000000004,Slight Wait,Neutral / Fair Value
+DFW Composite,payment_to_income_ratio,-0.02,Payment-to-income ratio improves by 2 points,45.84329268292683,48.24329268292683,2.4,Slight Wait,Neutral / Fair Value
+DFW Composite,mortgage_30yr,-0.5,Mortgage rate falls 0.5 percentage points,45.84329268292683,47.84329268292683,2.0,Slight Wait,Slight Wait
+DFW Composite,metro_unemployment,-0.5,Unemployment falls 0.5 percentage points,45.84329268292683,47.09329268292683,1.25,Slight Wait,Slight Wait
+DFW Composite,realtor_active_listings_yoy,0.1,Inventory growth improves by 10 percentage points,45.84329268292683,47.04329268292683,1.2000000000000002,Slight Wait,Slight Wait
+DFW Composite,metro_unemployment,0.5,Unemployment rises 0.5 percentage points,45.84329268292683,44.59329268292683,-1.25,Slight Wait,Slight Wait
+DFW Composite,mortgage_30yr,0.5,Mortgage rate rises 0.5 percentage points,45.84329268292683,43.84329268292683,-2.0,Slight Wait,Slight Wait
+DFW Composite,predicted_12m_growth,-0.02,Expected appreciation weakens by 2 percentage points,45.84329268292683,42.64329268292683,-3.2,Slight Wait,Slight Wait
+Wichita Composite,payment_to_income_ratio,-0.04,Payment-to-income ratio improves by 4 points,49.88170731707317,54.68170731707317,4.8,Neutral / Fair Value,Neutral / Fair Value
+Wichita Composite,mortgage_30yr,-1.0,Mortgage rate falls 1 percentage point,49.88170731707317,53.88170731707317,4.0,Neutral / Fair Value,Neutral / Fair Value
+Wichita Composite,predicted_12m_growth,0.02,Expected appreciation improves by 2 percentage points,49.88170731707317,53.081707317073175,3.2,Neutral / Fair Value,Neutral / Fair Value
+Wichita Composite,realtor_active_listings_yoy,0.2,Inventory growth improves by 20 percentage points,49.88170731707317,52.28170731707317,2.4000000000000004,Neutral / Fair Value,Neutral / Fair Value
+Wichita Composite,payment_to_income_ratio,-0.02,Payment-to-income ratio improves by 2 points,49.88170731707317,52.28170731707317,2.4,Neutral / Fair Value,Neutral / Fair Value
+Wichita Composite,mortgage_30yr,-0.5,Mortgage rate falls 0.5 percentage points,49.88170731707317,51.88170731707317,2.0,Neutral / Fair Value,Neutral / Fair Value
+Wichita Composite,metro_unemployment,-0.5,Unemployment falls 0.5 percentage points,49.88170731707317,51.13170731707317,1.25,Neutral / Fair Value,Neutral / Fair Value
+Wichita Composite,realtor_active_listings_yoy,0.1,Inventory growth improves by 10 percentage points,49.88170731707317,51.081707317073175,1.2000000000000002,Neutral / Fair Value,Neutral / Fair Value
+Wichita Composite,metro_unemployment,0.5,Unemployment rises 0.5 percentage points,49.88170731707317,48.63170731707317,-1.25,Neutral / Fair Value,Neutral / Fair Value
+Wichita Composite,mortgage_30yr,0.5,Mortgage rate rises 0.5 percentage points,49.88170731707317,47.88170731707317,-2.0,Neutral / Fair Value,Slight Wait
+Wichita Composite,predicted_12m_growth,-0.02,Expected appreciation weakens by 2 percentage points,49.88170731707317,46.68170731707317,-3.2,Neutral / Fair Value,Slight Wait
