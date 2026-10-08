@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pandas as pd
 
-CONTRACT_VERSION = "1.1.0"          # 1.1: model_version V11, out-of-sample calibration, walk_forward block
+CONTRACT_VERSION = "1.2.0"          # 1.1: V11, out-of-sample calibration, walk_forward; 1.2: rates_outlook
 STALE_AFTER_MONTHS = 6
 KNOWN_ISSUES = {
     "V10": [
@@ -150,9 +150,25 @@ def build_contract(outputs: Path, *, source_commit: str, run_id: str | None = No
         "markets": markets,
         "known_issues": KNOWN_ISSUES.get(model_version, KNOWN_ISSUES["V10"]),
         "warnings": ([f"MARKET_STATE_OLDER_THAN_{STALE_AFTER_MONTHS}_MONTHS: {', '.join(stale)}"] if stale else []),
+        "rates_outlook": _rates(outputs),
         "household": None,
         "automatic_execution_authorized": False,
     }
+
+
+def _rates(outputs: Path) -> dict | None:
+    """The mortgage-rate outlook (docs/RATES_PLAN.md), when the run produced one."""
+    path = Path(outputs) / "rates_outlook.json"
+    if not path.exists():
+        return None
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    test = doc.get("test") or {}
+    return {**doc["outlook"], "method": doc.get("method"), "generated_at_utc": doc.get("generated_at_utc"),
+            "test": {h: {k: v for k, v in t.items() if k in ("origins_tested", "effective_independent_tests", "first_origin",
+                                                               "last_origin", "rules", "published_mae", "rule_chosen_share",
+                                                               "band_coverage_10_90", "status", "mae_by_period")}
+                     for h, t in test.items()},
+            "fomc_sep_context": doc.get("fomc_sep_context")}
 
 
 def write_package(directory: Path, contract: dict) -> dict:

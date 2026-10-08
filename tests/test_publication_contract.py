@@ -39,7 +39,7 @@ def test_baseline_contract_carries_both_markets_honestly(contract):
 
 def test_package_round_trip_and_tamper_detection(contract, tmp_path):
     write_package(tmp_path, contract)
-    assert validate_package(tmp_path)["contract_version"] == "1.1.0"
+    assert validate_package(tmp_path)["contract_version"] == "1.2.0"
     path = tmp_path / "housing_uip_contract.json"
     path.write_text(path.read_text().replace("Slight Wait", "Buy"))
     with pytest.raises(ContractError, match="digest"):

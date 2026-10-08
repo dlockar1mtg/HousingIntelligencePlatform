@@ -24,6 +24,15 @@ def validate_contract(contract: dict) -> None:
         raise ContractError("household figures are not published in the housing contract")
     if contract.get("model_version") not in ("V10", "V11"):
         raise ContractError("unknown model_version")
+    rates = contract.get("rates_outlook")
+    if rates is not None:
+        for row in rates.get("horizons") or []:
+            if not 0 < float(row["center"]) < 25:
+                raise ContractError("rates_outlook center out of range")
+            if "p10" in row and not row["p10"] <= row["p50"] <= row["p90"]:
+                raise ContractError("rates_outlook band is not ordered")
+            if row.get("status") not in ("TESTED", "TOO_NARROW", "TOO_WIDE", "TOO_FEW_TESTS", "UNTESTED"):
+                raise ContractError("rates_outlook status is unknown")
     markets = {m.get("market"): m for m in contract.get("markets") or []}
     missing = REQUIRED_MARKETS - set(markets)
     if missing:
