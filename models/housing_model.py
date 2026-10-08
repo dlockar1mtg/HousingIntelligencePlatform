@@ -8,14 +8,17 @@ from config.utils import is_v11, load_settings
 
 TARGET = "target_4q_growth"
 
-def create_model() -> RandomForestRegressor:
+def create_model(n_jobs: int | None = None) -> RandomForestRegressor:
     settings = load_settings().get("model", {})
     return RandomForestRegressor(
         n_estimators=settings.get("n_estimators", 900),
         max_depth=settings.get("max_depth", 7),
         min_samples_leaf=settings.get("min_samples_leaf", 3),
         random_state=settings.get("random_state", 42),
-        n_jobs=settings.get("n_jobs", -1),               # parallel trees; results are identical for a fixed random_state
+        # Parallel trees only where the model is fitted many times (walk-forward). The Monte Carlo makes
+        # thousands of one-row predictions, where a thread pool per call is far slower than one core.
+        # Results are identical either way for a fixed random_state.
+        n_jobs=n_jobs,
     )
 
 def walk_forward_validation(data: pd.DataFrame, features: list[str], target: str = TARGET, gap: int | None = None) -> pd.DataFrame:
@@ -31,7 +34,7 @@ def walk_forward_validation(data: pd.DataFrame, features: list[str], target: str
             train = m.iloc[:i - g]
             test = m.iloc[[i]]
 
-            model = create_model()
+            model = create_model(n_jobs=-1)
             model.fit(train[features], train[target])
 
             pred = model.predict(test[features])[0]
