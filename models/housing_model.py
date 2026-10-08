@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 
-from config.utils import load_settings
+from config.utils import is_v11, load_settings
 
 TARGET = "target_4q_growth"
 
@@ -15,6 +15,7 @@ def create_model() -> RandomForestRegressor:
         max_depth=settings.get("max_depth", 7),
         min_samples_leaf=settings.get("min_samples_leaf", 3),
         random_state=settings.get("random_state", 42),
+        n_jobs=settings.get("n_jobs", -1),               # parallel trees; results are identical for a fixed random_state
     )
 
 def walk_forward_validation(data: pd.DataFrame, features: list[str], target: str = TARGET) -> pd.DataFrame:
@@ -22,10 +23,12 @@ def walk_forward_validation(data: pd.DataFrame, features: list[str], target: str
     min_train_rows = load_settings().get("model", {}).get("min_train_rows", 40)
 
     for market in data["market"].unique():
-        m = data[data["market"] == market].sort_index().dropna(subset=features + [target])
+        m = data[data["market"] == market].sort_index()
+        m = m.dropna(subset=[target]) if is_v11() else m.dropna(subset=features + [target])
+        gap = 3 if is_v11() else 0                   # V11: train only on rows whose 4-quarter target was known at the test quarter
 
         for i in range(min_train_rows, len(m)):
-            train = m.iloc[:i]
+            train = m.iloc[:i - gap]
             test = m.iloc[[i]]
 
             model = create_model()

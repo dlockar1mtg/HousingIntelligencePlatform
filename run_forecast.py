@@ -1,6 +1,6 @@
 import pandas as pd
 
-from config.utils import log, OUTPUT_DIR, INPUT_DIR
+from config.utils import log, OUTPUT_DIR, INPUT_DIR, is_v11, model_version
 from features.dataset import build_dataset
 from features.build_features import get_features
 from models.housing_model import create_model, walk_forward_validation, prediction_interval_from_backtest
@@ -18,19 +18,33 @@ MAX_PROJECTION_MONTHS=36
 PROJECTION_STEP_MONTHS=6
 
 def main():
-    log("Starting Housing Predictor V10 Optimization Platform...\n")
+    log(f"Starting Housing Predictor {model_version()} Optimization Platform...\n")
     data,county_drilldown=build_dataset()
     features=get_features(data)
-    model_data=data.dropna(subset=features+[TARGET]).copy()
-    if model_data.empty: raise RuntimeError("No usable model rows were created.")
+    if is_v11():
+        # V11: train on quarters whose 4-quarter target is realized; score every quarter, newest included.
+        train=data.dropna(subset=[TARGET]).copy()
+        model_data=data.copy()
+    else:
+        model_data=data.dropna(subset=features+[TARGET]).copy()
+        train=model_data
+    if train.empty: raise RuntimeError("No usable model rows were created.")
 
     log("\nRunning walk-forward validation...")
-    backtest=walk_forward_validation(model_data,features,TARGET)
+    backtest=walk_forward_validation(train,features,TARGET)
 
     log("\nTraining final model...")
     model=create_model()
-    model.fit(model_data[features],model_data[TARGET])
+    model.fit(train[features],train[TARGET])
     model_data["predicted_12m_growth"]=model.predict(model_data[features])
+    if is_v11() and not backtest.empty:
+        # History gets its walk-forward (out-of-sample) prediction, so scores and calibration are honest;
+        # quarters newer than the training data keep the final model's prediction, which is out of sample.
+        oos=backtest.set_index(["market","date"])["walk_forward_predicted_12m_growth"]
+        keys=list(zip(model_data["market"],model_data.index))
+        in_train=model_data[TARGET].notna()
+        model_data["predicted_12m_growth"]=[oos.get(k,float("nan")) if t else p for k,t,p in zip(keys,in_train,model_data["predicted_12m_growth"])]
+        model_data["prediction_basis"]=["WALK_FORWARD" if t and k in oos.index else ("NONE" if t else "FINAL_MODEL") for k,t in zip(keys,in_train)]
     model_data["projected_hpi_12m"]=model_data["hpi"]*(1+model_data["predicted_12m_growth"])
     importances=pd.DataFrame({"feature":features,"importance":model.feature_importances_}).sort_values("importance",ascending=False)
 

@@ -2,13 +2,22 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from config.utils import is_v11
+
 def percentile_score(series: pd.Series, higher_is_better: bool = True) -> pd.Series:
     pct = series.rank(pct=True) * 100
+    return pct if higher_is_better else 100 - pct
+
+def point_in_time_percentile(series: pd.Series, higher_is_better: bool = True) -> pd.Series:
+    """V11: each quarter's percentile among the market's quarters up to and including it."""
+    pct = series.expanding().rank(pct=True) * 100
     return pct if higher_is_better else 100 - pct
 
 def safe_score(data: pd.DataFrame, col: str, higher_is_better: bool = True) -> pd.Series:
     if col not in data.columns:
         return pd.Series(50, index=data.index)
+    if is_v11():
+        return data.groupby("market")[col].transform(lambda x: point_in_time_percentile(x.sort_index(), higher_is_better).reindex(x.index)).fillna(50)
     return data.groupby("market")[col].transform(lambda x: percentile_score(x, higher_is_better)).fillna(50)
 
 def add_entry_scores(data: pd.DataFrame) -> pd.DataFrame:
