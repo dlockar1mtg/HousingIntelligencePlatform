@@ -83,3 +83,21 @@ def test_v11_contract_publishes_the_out_of_sample_calibration(tmp_path, monkeypa
     bad["markets"][0]["calibration"]["in_sample"] = True
     with pytest.raises(ContractError, match="out-of-sample"):
         validate_contract(bad)
+
+
+def test_the_rates_outlook_is_published_and_checked(tmp_path, monkeypatch):
+    import shutil
+    out = tmp_path / "outputs"
+    shutil.copytree(BASE, out)
+    rates = json.loads((Path(__file__).resolve().parents[1] / "docs" / "RATES_RESULTS.json").read_text())
+    (out / "rates_outlook.json").write_text(json.dumps(rates))
+    c = build_contract(out, source_commit="abc", run_id="3", generated_at="2026-10-08T00:00:00+00:00")
+    validate_contract(c)
+    r = c["rates_outlook"]
+    row = next(h for h in r["horizons"] if h["months"] == 36)
+    assert row["p10"] <= row["p50"] <= row["p90"] and r["test"]["36"]["status"] in ("TESTED", "TOO_WIDE", "TOO_NARROW")
+    assert r["fomc_sep_context"]["note"].startswith("FOMC participants")
+    bad = copy.deepcopy(c)
+    next(h for h in bad["rates_outlook"]["horizons"] if h["months"] == 36)["p10"] = 99
+    with pytest.raises(ContractError, match="rates_outlook"):
+        validate_contract(bad)
