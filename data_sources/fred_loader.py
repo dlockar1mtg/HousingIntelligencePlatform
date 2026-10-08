@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import os
+from pathlib import Path
+
 import pandas as pd
 from pandas_datareader import data as web
 
@@ -8,10 +11,27 @@ from config.utils import log, load_settings
 
 START_DATE = load_settings().get("start_date", "2000-01-01")
 
+SNAPSHOT_DIR = os.environ.get("HOUSING_FRED_SNAPSHOT", "").strip()   # read raw series from here (reproducible runs)
+SAVE_DIR = os.environ.get("HOUSING_FRED_SAVE", "").strip()           # save each raw series here after downloading
+
+
+def _raw_series(series_id: str) -> pd.DataFrame:
+    if SNAPSHOT_DIR:
+        path = Path(SNAPSHOT_DIR) / f"{series_id}.csv"
+        if not path.exists():
+            raise FileNotFoundError(f"{series_id} is not in the FRED snapshot")
+        return pd.read_csv(path, index_col=0, parse_dates=True)
+    df = web.DataReader(series_id, "fred", START_DATE)
+    if SAVE_DIR:
+        Path(SAVE_DIR).mkdir(parents=True, exist_ok=True)
+        df.to_csv(Path(SAVE_DIR) / f"{series_id}.csv")
+    return df
+
+
 def fred(series_id: str, name: str, freq: str = "QE") -> pd.DataFrame | None:
     try:
-        log(f"Downloading {name}: {series_id}")
-        df = web.DataReader(series_id, "fred", START_DATE)
+        log(f"{'Reading' if SNAPSHOT_DIR else 'Downloading'} {name}: {series_id}")
+        df = _raw_series(series_id)
         df = df.resample(freq).mean()
         df.columns = [name]
         return df

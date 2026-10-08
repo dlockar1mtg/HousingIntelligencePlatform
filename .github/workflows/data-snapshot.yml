@@ -1,0 +1,61 @@
+name: Data snapshot
+# Saves every raw FRED series V10/V11 reads, and the ACS income history, into data/snapshot/ on the
+# pushed branch, so model changes can be developed and compared on identical inputs.
+on:
+  push:
+    branches: ["v11-*"]
+    paths: [".github/workflows/data-snapshot.yml", "data/snapshot/REQUEST"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  snapshot:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Download every FRED series the model reads
+        env:
+          HOUSING_FRED_SAVE: data/snapshot/fred
+        run: |
+          python - <<'PY'
+          from config.markets import MARKETS
+          from data_sources import fred_loader as F
+          F.download_national()
+          for name, cfg in MARKETS.items():
+              F.download_target_hpi(cfg)
+              F.download_market_metro_series(cfg)
+              F.download_county_layer(name, cfg["counties"])
+          PY
+          ls data/snapshot/fred | wc -l
+      - name: Download the ACS income history (2009 onward)
+        env:
+          CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
+        run: |
+          python - <<'PY'
+          import time, pandas as pd
+          from config.markets import MARKETS
+          from config.utils import get_census_api_key
+          from data_sources.census_loader import fetch_census_county
+          key = get_census_api_key(); rows = []
+          for market, cfg in MARKETS.items():
+              for county, c in cfg["counties"].items():
+                  for year in range(2009, 2026):
+                      r = fetch_census_county(year, c["fips"], key)
+                      if r: rows.append({**r, "market": market, "county": county})
+                      time.sleep(0.05)
+          pd.DataFrame(rows).to_csv("data/snapshot/census_income_county_history.csv", index=False)
+          print(len(rows), "county-years")
+          PY
+      - name: Commit the snapshot to this branch
+        run: |
+          date -u +%FT%TZ > data/snapshot/TAKEN_AT
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/snapshot
+          git diff --cached --quiet || git commit -m "Data snapshot $(date -u +%F)"
+          git push
