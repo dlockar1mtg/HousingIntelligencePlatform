@@ -1,0 +1,135 @@
+{
+ "plan": "docs/V11_PLAN.md",
+ "inputs": {
+  "fred_snapshot": "data/snapshot/fred",
+  "taken_at": "2026-10-08T13:18:42Z"
+ },
+ "V10": {
+  "version": "V10",
+  "rows": 164,
+  "train_rows": 164,
+  "features": 62,
+  "walk_forward_honest": {
+   "DFW Composite": {
+    "quarters": 42,
+    "mae": 0.0489,
+    "direction_accuracy": 0.976
+   },
+   "Wichita Composite": {
+    "quarters": 42,
+    "mae": 0.0331,
+    "direction_accuracy": 1.0
+   }
+  },
+  "walk_forward_as_published": {
+   "DFW Composite": {
+    "quarters": 42,
+    "mae": 0.0291,
+    "direction_accuracy": 0.976
+   },
+   "Wichita Composite": {
+    "quarters": 42,
+    "mae": 0.0218,
+    "direction_accuracy": 1.0
+   }
+  },
+  "latest": {
+   "Wichita Composite": {
+    "quarter": "2025-06-30",
+    "entry_score": 49.88,
+    "signal": "Neutral / Fair Value",
+    "predicted_12m_growth": 0.0295,
+    "mortgage_30yr": 6.788,
+    "zillow_zhvi": 197479.0,
+    "payment_to_income_ratio": 0.1746
+   },
+   "DFW Composite": {
+    "quarter": "2025-06-30",
+    "entry_score": 45.84,
+    "signal": "Slight Wait",
+    "predicted_12m_growth": 0.0073,
+    "mortgage_30yr": 6.788,
+    "zillow_zhvi": 280794.0,
+    "payment_to_income_ratio": 0.1907
+   }
+  },
+  "calibration_out_of_sample": {
+   "DFW Composite": {
+    "quarters": 42,
+    "rank_correlation": 0.025,
+    "correlation": -0.142,
+    "mean_growth_neutral_or_better": 0.0837,
+    "mean_growth_below_neutral": 0.073,
+    "quarters_neutral_or_better": 12,
+    "status": "FAIL"
+   },
+   "Wichita Composite": {
+    "quarters": 42,
+    "rank_correlation": -0.38,
+    "correlation": -0.454,
+    "mean_growth_neutral_or_better": 0.0535,
+    "mean_growth_below_neutral": 0.0722,
+    "quarters_neutral_or_better": 17,
+    "status": "FAIL"
+   }
+  }
+ },
+ "V11": {
+  "version": "V11",
+  "rows": 212,
+  "train_rows": 204,
+  "features": 43,
+  "walk_forward_honest": {
+   "DFW Composite": {
+    "quarters": 62,
+    "mae": 0.0433,
+    "direction_accuracy": 0.855
+   },
+   "Wichita Composite": {
+    "quarters": 62,
+    "mae": 0.0274,
+    "direction_accuracy": 0.806
+   }
+  },
+  "latest": {
+   "Wichita Composite": {
+    "quarter": "2026-06-30",
+    "entry_score": 42.45,
+    "signal": "Slight Wait",
+    "predicted_12m_growth": 0.014,
+    "mortgage_30yr": 6.415,
+    "zillow_zhvi": 226015.0,
+    "payment_to_income_ratio": 0.1922
+   },
+   "DFW Composite": {
+    "quarter": "2026-06-30",
+    "entry_score": 41.09,
+    "signal": "Slight Wait",
+    "predicted_12m_growth": 0.0059,
+    "mortgage_30yr": 6.415,
+    "zillow_zhvi": 366794.0,
+    "payment_to_income_ratio": 0.2397
+   }
+  },
+  "calibration_out_of_sample": {
+   "DFW Composite": {
+    "quarters": 62,
+    "rank_correlation": -0.122,
+    "correlation": -0.312,
+    "mean_growth_neutral_or_better": 0.0527,
+    "mean_growth_below_neutral": 0.0933,
+    "quarters_neutral_or_better": 43,
+    "status": "FAIL"
+   },
+   "Wichita Composite": {
+    "quarters": 62,
+    "rank_correlation": -0.427,
+    "correlation": -0.502,
+    "mean_growth_neutral_or_better": 0.0357,
+    "mean_growth_below_neutral": 0.0788,
+    "quarters_neutral_or_better": 48,
+    "status": "FAIL"
+   }
+  }
+ }
+}

@@ -9,9 +9,19 @@
 6. Personal readiness is first-generation; PMI is approximate; "comfortable price" follows lender logic.
 7. No individual-property analysis; no market-specific feature weights.
 
+## Status (2026-10-08): fixed in V11
+All five review findings below are fixed in V11, which production now runs. `docs/V11_RESULTS.md` has the
+before/after numbers. V10 keeps them on purpose (`HOUSING_MODEL_VERSION=V10`), so the 2026-09-13 baseline
+still reproduces. Two things remain, and the contract states both:
+- **The Entry Score is not a validated timing signal.** In the out-of-sample test, higher scores came before
+  *slower* price growth in both markets (rank correlation −0.43 Wichita, −0.12 DFW). The score describes buyer
+  conditions; the model's own 12-month forecast is the part that ranks future growth.
+- **Short-history layers are left out of the model.** Realtor.com and county listings start in 2016, and with
+  no back-filling they fail V10's 40%-missing feature rule. They still feed the Entry Score where they exist.
+Items 2–3 of the handoff list are superseded by the out-of-sample test.
+
 ## Found in the migration review (2026-10-07)
-These are kept exactly as V10 behaves so the baseline reproduces. Each is a V11 fix, to ship with a
-before/after comparison.
+These were kept exactly as V10 behaves so the baseline reproduces. Each was fixed in V11 (above).
 
 1. **The "latest" forecast is five quarters old.** `build_dataset` drops rows without a realized 4-quarter
    target, and `run_forecast` takes the last remaining row as "latest". In the 2026-09-13 run that row is

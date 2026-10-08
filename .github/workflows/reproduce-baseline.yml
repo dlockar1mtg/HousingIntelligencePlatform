@@ -1,17 +1,19 @@
-name: Reproduce the V10 baseline
+name: Reproduce the V10 baseline and check V11
 # Phase 2 gate, online half: rebuild the 2026-09-13 run from live FRED plus the committed baseline input
 # files and check it lands in the same decision state. No personal profile is used, so the household
 # outputs are skipped; the market side is what is compared.
 on:
   workflow_dispatch:
   pull_request:
-    paths: ["baseline/**", "config/**", "data_sources/**", "features/**", "models/**", "scoring/**", "run_forecast.py", ".github/workflows/reproduce-baseline.yml"]
+    paths: ["baseline/**", "config/**", "inputs/**", "publication/**", "validation/**", "data_sources/**", "features/**", "models/**", "scoring/**", "run_forecast.py", ".github/workflows/reproduce-baseline.yml"]
 permissions:
   contents: read
 jobs:
   reproduce:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    env:
+      HOUSING_MODEL_VERSION: V10      # the baseline is V10; production runs V11 (config/settings.json)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -50,6 +52,44 @@ jobs:
         with:
           name: v10-reproduction-${{ github.run_id }}
           path: |
+            outputs/
+            forecast.log
+          retention-days: 14
+
+  v11:
+    # The production model on live FRED with the baseline market files: builds and validates the 1.1 contract.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      HOUSING_MODEL_VERSION: V11
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Install the baseline market files (Census income is the committed yearly history)
+        run: for f in zhvi_metro zori_metro realtor_inventory; do gunzip -c baseline/v10-2026-09-13/inputs/$f.csv.gz > inputs/$f.csv; done
+      - name: Run V11 (live FRED)
+        run: python run_forecast.py | tee forecast.log
+      - name: Build and validate the contract
+        run: |
+          python publish_uip.py --package uip-package | tee publish.log
+          python - <<'PY'
+          import json
+          c = json.load(open("uip-package/housing_uip_contract.json"))
+          for m in c["markets"]:
+              cal, wf = m["calibration"], m.get("walk_forward") or {}
+              print(f"::notice title={m['market']} V11::{m['market_state_as_of']} score {m['entry_score']} {m['signal']} | next 12m {m['predicted_12m_growth']:+.2%} | walk-forward MAE {wf.get('mae')} over {wf.get('quarters')} quarters | timing test {cal['status']} rank {cal.get('rank_correlation')} over {cal.get('quarters')} quarters")
+          print(f"::notice title=Contract::{c['contract_version']} {c['model_version']} known issues {c['known_issues']} warnings {c['warnings']}")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v11-check-${{ github.run_id }}
+          path: |
+            uip-package/
             outputs/
             forecast.log
           retention-days: 14

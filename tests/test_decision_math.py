@@ -7,6 +7,12 @@ from decision.purchase_optimizer import payment
 from validation.historical_calibration import build_historical_calibration
 
 
+@pytest.fixture(autouse=True)
+def _v10(monkeypatch):
+    """These tests pin V10's behaviour (the 2026-09-13 baseline); production runs V11."""
+    monkeypatch.setenv("HOUSING_MODEL_VERSION", "V10")
+
+
 def test_payment_matches_the_standard_formula():
     assert payment(280000, 6.5, 30) == pytest.approx(1769.79, abs=0.01)
     assert payment(0, 6.5, 30) == 0.0

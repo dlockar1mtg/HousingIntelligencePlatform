@@ -49,8 +49,25 @@ def oos_calibration(frame: pd.DataFrame) -> dict:
     return out
 
 
+def prepare_inputs(version: str) -> None:
+    """Same market files for both versions (the baseline's); Census income as each version reads it."""
+    import gzip, shutil
+    base = ROOT / "baseline" / "v10-2026-09-13" / "inputs"
+    inputs = ROOT / "inputs"
+    for name in ("zhvi_metro", "zori_metro", "realtor_inventory"):
+        with gzip.open(base / f"{name}.csv.gz", "rb") as src, open(inputs / f"{name}.csv", "wb") as dst:
+            shutil.copyfileobj(src, dst)
+    if version == "V11":
+        from data_sources.census_loader import market_income_rows
+        hist = pd.read_csv(ROOT / "data" / "snapshot" / "census_income_county_history.csv")
+        market_income_rows(hist).to_csv(inputs / "census_income.csv", index=False)
+    else:
+        shutil.copy(base / "census_income.csv", inputs / "census_income.csv")
+
+
 def evaluate(version: str) -> dict:
     os.environ["HOUSING_MODEL_VERSION"] = version
+    prepare_inputs(version)
     from features.build_features import get_features
     from features.dataset import build_dataset
     from models.housing_model import create_model, walk_forward_validation
@@ -93,10 +110,13 @@ def evaluate(version: str) -> dict:
 def main() -> int:
     if not os.environ.get("HOUSING_FRED_SNAPSHOT"):
         sys.exit("set HOUSING_FRED_SNAPSHOT to the FRED snapshot directory")
+    kept = {n: (ROOT / "inputs" / n).read_bytes() for n in ("census_income.csv", "census_income_county_detail.csv")}
     results = {"plan": "docs/V11_PLAN.md", "inputs": {"fred_snapshot": os.environ["HOUSING_FRED_SNAPSHOT"],
                "taken_at": (Path(os.environ["HOUSING_FRED_SNAPSHOT"]).parent / "TAKEN_AT").read_text().strip()
                if (Path(os.environ["HOUSING_FRED_SNAPSHOT"]).parent / "TAKEN_AT").exists() else None},
                "V10": evaluate("V10"), "V11": evaluate("V11")}
+    for n, data in kept.items():                      # leave the tracked inputs as they were
+        (ROOT / "inputs" / n).write_bytes(data)
     out = ROOT / "docs" / "V11_RESULTS.json"
     out.write_text(json.dumps(results, indent=1) + "\n", encoding="utf-8")
     print(json.dumps({v: {k: results[v][k] for k in ("latest", "walk_forward_honest", "calibration_out_of_sample")} for v in ("V10", "V11")}, indent=1))

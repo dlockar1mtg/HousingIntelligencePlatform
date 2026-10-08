@@ -1,10 +1,18 @@
 from __future__ import annotations
 import numpy as np
 import pandas as pd
+from config.utils import is_v11
 from scoring.entry_score import signal_strength
+
+# docs/V11_PLAN.md pass marks, registered before results.
+MIN_OUT_OF_SAMPLE_QUARTERS=40
+MIN_RANK_CORRELATION=0.10
 
 def build_historical_calibration(model_data):
     data=model_data.dropna(subset=["entry_score","target_4q_growth"]).copy()
+    if is_v11():
+        # V11: only quarters whose score used a walk-forward (out-of-sample) prediction and point-in-time percentiles.
+        data=data[data.get("prediction_basis",pd.Series("NONE",index=data.index))=="WALK_FORWARD"]
     if data.empty: return pd.DataFrame(),pd.DataFrame()
     data["historical_signal"]=data["entry_score"].apply(signal_strength)
     rows=[]
@@ -14,5 +22,16 @@ def build_historical_calibration(model_data):
     diag=[]
     for market,g in data.groupby("market"):
         low=g[g["entry_score"]<48]; high=g[g["entry_score"]>=48]
-        diag.append({"market":market,"observations":len(g),"entry_score_future_growth_correlation":g["entry_score"].corr(g["target_4q_growth"]),"entry_score_future_growth_rank_correlation":g["entry_score"].rank().corr(g["target_4q_growth"].rank()),"mean_growth_below_neutral":low["target_4q_growth"].mean() if not low.empty else np.nan,"mean_growth_neutral_or_better":high["target_4q_growth"].mean() if not high.empty else np.nan,"decline_rate_below_neutral":(low["target_4q_growth"]<0).mean() if not low.empty else np.nan,"decline_rate_neutral_or_better":(high["target_4q_growth"]<0).mean() if not high.empty else np.nan,"calibration_pass":bool(not low.empty and not high.empty and high["target_4q_growth"].mean()>=low["target_4q_growth"].mean())})
-    return cal,pd.DataFrame(diag)
+        diag.append({"market":market,"observations":len(g),"entry_score_future_growth_correlation":g["entry_score"].corr(g["target_4q_growth"]),"entry_score_future_growth_rank_correlation":g["entry_score"].rank().corr(g["target_4q_growth"].rank()),"mean_growth_below_neutral":low["target_4q_growth"].mean() if not low.empty else np.nan,"mean_growth_neutral_or_better":high["target_4q_growth"].mean() if not high.empty else np.nan,"decline_rate_below_neutral":(low["target_4q_growth"]<0).mean() if not low.empty else np.nan,"decline_rate_neutral_or_better":(high["target_4q_growth"]<0).mean() if not high.empty else np.nan,"calibration_pass":_passes(g,low,high)})
+    diag=pd.DataFrame(diag)
+    if is_v11():
+        diag["in_sample"]=False
+        diag["method"]="OUT_OF_SAMPLE_POINT_IN_TIME_WALK_FORWARD_MOMENTUM"
+    return cal,diag
+
+def _passes(g,low,high):
+    ordered=bool(not low.empty and not high.empty and high["target_4q_growth"].mean()>=low["target_4q_growth"].mean())
+    if not is_v11():
+        return ordered
+    rank=g["entry_score"].rank().corr(g["target_4q_growth"].rank())
+    return bool(ordered and len(g)>=MIN_OUT_OF_SAMPLE_QUARTERS and rank==rank and rank>=MIN_RANK_CORRELATION)

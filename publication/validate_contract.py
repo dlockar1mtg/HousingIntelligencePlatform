@@ -22,6 +22,8 @@ def validate_contract(contract: dict) -> None:
         raise ContractError("automatic execution must be false")
     if contract.get("household") is not None:
         raise ContractError("household figures are not published in the housing contract")
+    if contract.get("model_version") not in ("V10", "V11"):
+        raise ContractError("unknown model_version")
     markets = {m.get("market"): m for m in contract.get("markets") or []}
     missing = REQUIRED_MARKETS - set(markets)
     if missing:
@@ -35,6 +37,8 @@ def validate_contract(contract: dict) -> None:
             raise ContractError(f"{name}: market_state_as_of is required")
         if (m.get("calibration") or {}).get("status") not in ("PASS", "FAIL"):
             raise ContractError(f"{name}: calibration status is required")
+        if contract["model_version"] == "V11" and (m.get("calibration") or {}).get("in_sample") is not False:
+            raise ContractError(f"{name}: V11 publishes only the out-of-sample calibration")
         if not -0.5 < float(m["predicted_12m_growth"]) < 0.5:
             raise ContractError(f"{name}: predicted growth out of range")
 

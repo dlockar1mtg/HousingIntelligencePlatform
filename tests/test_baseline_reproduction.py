@@ -4,6 +4,7 @@ The baseline's full model history (features, target, predictions, scores) is com
 model on it and re-scoring must give the same latest Entry Scores and signals. The online half (the same
 run rebuilt from live FRED plus the baseline input files) is the reproduce-baseline workflow.
 """
+import pytest
 from pathlib import Path
 
 import numpy as np
@@ -14,6 +15,12 @@ from models.housing_model import create_model
 from scoring.entry_score import add_entry_scores, entry_signal
 
 BASE = Path(__file__).resolve().parents[1] / "baseline" / "v10-2026-09-13" / "outputs"
+
+
+@pytest.fixture(autouse=True)
+def _v10(monkeypatch):
+    """These tests pin V10's behaviour (the 2026-09-13 baseline); production runs V11."""
+    monkeypatch.setenv("HOUSING_MODEL_VERSION", "V10")
 
 
 def test_refit_reproduces_latest_scores_and_signals():
