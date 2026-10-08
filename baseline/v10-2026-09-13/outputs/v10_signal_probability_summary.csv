@@ -1,0 +1,99 @@
+market,horizon_months,horizon_label,signal_strength,probability
+DFW Composite,0,Today,Strong Buy,0.0
+DFW Composite,0,Today,Buy,0.0
+DFW Composite,0,Today,Slight Buy,0.0
+DFW Composite,0,Today,Neutral / Fair Value,0.132
+DFW Composite,0,Today,Slight Wait,0.868
+DFW Composite,0,Today,Wait,0.0
+DFW Composite,0,Today,Strong Wait / High Risk,0.0
+DFW Composite,6,6 months,Strong Buy,0.0
+DFW Composite,6,6 months,Buy,0.0
+DFW Composite,6,6 months,Slight Buy,0.0
+DFW Composite,6,6 months,Neutral / Fair Value,0.356
+DFW Composite,6,6 months,Slight Wait,0.644
+DFW Composite,6,6 months,Wait,0.0
+DFW Composite,6,6 months,Strong Wait / High Risk,0.0
+DFW Composite,12,12 months,Strong Buy,0.0
+DFW Composite,12,12 months,Buy,0.0
+DFW Composite,12,12 months,Slight Buy,0.0
+DFW Composite,12,12 months,Neutral / Fair Value,0.44
+DFW Composite,12,12 months,Slight Wait,0.5585
+DFW Composite,12,12 months,Wait,0.0015
+DFW Composite,12,12 months,Strong Wait / High Risk,0.0
+DFW Composite,18,18 months,Strong Buy,0.0
+DFW Composite,18,18 months,Buy,0.0
+DFW Composite,18,18 months,Slight Buy,0.0
+DFW Composite,18,18 months,Neutral / Fair Value,0.457
+DFW Composite,18,18 months,Slight Wait,0.5335
+DFW Composite,18,18 months,Wait,0.0095
+DFW Composite,18,18 months,Strong Wait / High Risk,0.0
+DFW Composite,24,24 months,Strong Buy,0.0
+DFW Composite,24,24 months,Buy,0.0
+DFW Composite,24,24 months,Slight Buy,0.0025
+DFW Composite,24,24 months,Neutral / Fair Value,0.485
+DFW Composite,24,24 months,Slight Wait,0.4875
+DFW Composite,24,24 months,Wait,0.025
+DFW Composite,24,24 months,Strong Wait / High Risk,0.0
+DFW Composite,30,30 months,Strong Buy,0.0
+DFW Composite,30,30 months,Buy,0.0
+DFW Composite,30,30 months,Slight Buy,0.013
+DFW Composite,30,30 months,Neutral / Fair Value,0.47
+DFW Composite,30,30 months,Slight Wait,0.4845
+DFW Composite,30,30 months,Wait,0.0325
+DFW Composite,30,30 months,Strong Wait / High Risk,0.0
+DFW Composite,36,36 months,Strong Buy,0.0
+DFW Composite,36,36 months,Buy,0.001
+DFW Composite,36,36 months,Slight Buy,0.035
+DFW Composite,36,36 months,Neutral / Fair Value,0.453
+DFW Composite,36,36 months,Slight Wait,0.4655
+DFW Composite,36,36 months,Wait,0.0455
+DFW Composite,36,36 months,Strong Wait / High Risk,0.0
+Wichita Composite,0,Today,Strong Buy,0.0
+Wichita Composite,0,Today,Buy,0.0
+Wichita Composite,0,Today,Slight Buy,0.0
+Wichita Composite,0,Today,Neutral / Fair Value,0.9965
+Wichita Composite,0,Today,Slight Wait,0.0035
+Wichita Composite,0,Today,Wait,0.0
+Wichita Composite,0,Today,Strong Wait / High Risk,0.0
+Wichita Composite,6,6 months,Strong Buy,0.0
+Wichita Composite,6,6 months,Buy,0.0
+Wichita Composite,6,6 months,Slight Buy,0.0135
+Wichita Composite,6,6 months,Neutral / Fair Value,0.9425
+Wichita Composite,6,6 months,Slight Wait,0.044
+Wichita Composite,6,6 months,Wait,0.0
+Wichita Composite,6,6 months,Strong Wait / High Risk,0.0
+Wichita Composite,12,12 months,Strong Buy,0.0
+Wichita Composite,12,12 months,Buy,0.0
+Wichita Composite,12,12 months,Slight Buy,0.0545
+Wichita Composite,12,12 months,Neutral / Fair Value,0.87
+Wichita Composite,12,12 months,Slight Wait,0.0755
+Wichita Composite,12,12 months,Wait,0.0
+Wichita Composite,12,12 months,Strong Wait / High Risk,0.0
+Wichita Composite,18,18 months,Strong Buy,0.0
+Wichita Composite,18,18 months,Buy,0.0
+Wichita Composite,18,18 months,Slight Buy,0.0965
+Wichita Composite,18,18 months,Neutral / Fair Value,0.8005
+Wichita Composite,18,18 months,Slight Wait,0.103
+Wichita Composite,18,18 months,Wait,0.0
+Wichita Composite,18,18 months,Strong Wait / High Risk,0.0
+Wichita Composite,24,24 months,Strong Buy,0.0
+Wichita Composite,24,24 months,Buy,0.0
+Wichita Composite,24,24 months,Slight Buy,0.1265
+Wichita Composite,24,24 months,Neutral / Fair Value,0.7225
+Wichita Composite,24,24 months,Slight Wait,0.1505
+Wichita Composite,24,24 months,Wait,0.0005
+Wichita Composite,24,24 months,Strong Wait / High Risk,0.0
+Wichita Composite,30,30 months,Strong Buy,0.0
+Wichita Composite,30,30 months,Buy,0.0005
+Wichita Composite,30,30 months,Slight Buy,0.1585
+Wichita Composite,30,30 months,Neutral / Fair Value,0.6695
+Wichita Composite,30,30 months,Slight Wait,0.171
+Wichita Composite,30,30 months,Wait,0.0005
+Wichita Composite,30,30 months,Strong Wait / High Risk,0.0
+Wichita Composite,36,36 months,Strong Buy,0.0
+Wichita Composite,36,36 months,Buy,0.0025
+Wichita Composite,36,36 months,Slight Buy,0.1905
+Wichita Composite,36,36 months,Neutral / Fair Value,0.615
+Wichita Composite,36,36 months,Slight Wait,0.191
+Wichita Composite,36,36 months,Wait,0.001
+Wichita Composite,36,36 months,Strong Wait / High Risk,0.0

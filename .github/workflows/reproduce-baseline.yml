@@ -1,0 +1,55 @@
+name: Reproduce the V10 baseline
+# Phase 2 gate, online half: rebuild the 2026-09-13 run from live FRED plus the committed baseline input
+# files and check it lands in the same decision state. No personal profile is used, so the household
+# outputs are skipped; the market side is what is compared.
+on:
+  workflow_dispatch:
+  pull_request:
+    paths: ["baseline/**", "config/**", "data_sources/**", "features/**", "models/**", "scoring/**", "run_forecast.py", ".github/workflows/reproduce-baseline.yml"]
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Install the baseline input files
+        run: |
+          for f in zhvi_metro zori_metro realtor_inventory; do gunzip -c baseline/v10-2026-09-13/inputs/$f.csv.gz > inputs/$f.csv; done
+          cp baseline/v10-2026-09-13/inputs/census_income*.csv inputs/
+      - name: Run V10 (live FRED)
+        run: python run_forecast.py | tee forecast.log
+      - name: Compare with the baseline
+        run: |
+          python - <<'PY'
+          import pandas as pd, sys
+          base = pd.read_csv("baseline/v10-2026-09-13/outputs/v10_latest_forecast.csv").set_index("market")
+          now = pd.read_csv("outputs/v10_latest_forecast.csv").set_index("market")
+          ok = True
+          for m in base.index:
+              b, n = base.loc[m], now.loc[m]
+              same = b["entry_signal"] == n["entry_signal"]
+              ok &= bool(same) and abs(b["entry_score"] - n["entry_score"]) <= 2.0
+              print(f"::notice title={m}::baseline {b['entry_score']:.2f} {b['entry_signal']} | now {n['entry_score']:.2f} {n['entry_signal']} | predicted growth {b['predicted_12m_growth_pct']:.2f}% -> {n['predicted_12m_growth_pct']:.2f}%")
+          rb = pd.read_csv("baseline/v10-2026-09-13/outputs/v10_market_ranking.csv").set_index("market")
+          rn = pd.read_csv("outputs/v10_market_ranking.csv").set_index("market")
+          for m in rb.index:
+              print(f"::notice title={m} ranking::baseline rank {rb.loc[m,'market_rank']} | now {rn.loc[m,'market_rank']}")
+              ok &= int(rb.loc[m, "market_rank"]) == int(rn.loc[m, "market_rank"])
+          print("::notice title=Gate::" + ("same decision state as the V10 baseline" if ok else "decision state differs from the V10 baseline"))
+          sys.exit(0 if ok else 1)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v10-reproduction-${{ github.run_id }}
+          path: |
+            outputs/
+            forecast.log
+          retention-days: 14

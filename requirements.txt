@@ -1,0 +1,5 @@
+# V10 dependencies, pinned to the major versions V10 was built and run on.
+pandas>=2.2,<3
+numpy>=1.26,<3
+pandas-datareader>=0.10,<1
+scikit-learn>=1.4,<2

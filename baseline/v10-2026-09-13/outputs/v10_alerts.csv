@@ -1,0 +1,4 @@
+market,severity,alert_type,message
+Wichita Composite,Medium,Fair Value,Wichita Composite has reached Neutral/Fair Value.
+DFW Composite,Informational,Projected Opportunity Window,DFW Composite first meaningful improvement: 6 months.
+Wichita Composite,Informational,Projected Opportunity Window,Wichita Composite first meaningful improvement: 12 months.

@@ -1,1 +1,41 @@
-# HousingIntelligencePlatform
+# Housing Intelligence Platform
+
+A governed housing-market forecasting and home-purchase decision system. It combines macroeconomic,
+local housing, affordability, simulation and household financial data to estimate market opportunity,
+purchase readiness, financing trade-offs and future entry conditions for the **Wichita** and
+**Dallas–Fort Worth** composites. It publishes a small, versioned contract to the Universal Investment
+Platform (UIP), where the Homestead page combines housing with the rest of the household plan.
+
+Migrated from the local `HousingPredictorv6` project (V10) on 2026-10-07. See `docs/HANDOFF_2026-10-07.md`.
+
+## Status
+
+| Phase | What | State |
+|---|---|---|
+| 0–1 | Freeze V10 and import it unchanged | this repo |
+| 2 | Reproduce the V10 run of 2026-09-13 | offline test passes; online workflow `Reproduce the V10 baseline` |
+| 3 | Tests and CI | `Tests` workflow |
+| 4 | `housing_uip_contract.json` | next |
+| 5 | UIP consumer (Homestead) | next |
+| V11 | Fix the issues in `docs/MODEL_LIMITATIONS.md` | after integration, with before/after evidence |
+
+## Running
+
+```bash
+pip install -r requirements-dev.txt
+python update_data.py      # Zillow, Realtor.com and Census refresh (needs CENSUS_API_KEY)
+python run_forecast.py     # V10: FRED download, model, Monte Carlo, decision tools, outputs/
+python -m pytest -q
+```
+
+`CENSUS_API_KEY` comes from the environment (a GitHub Actions secret in CI). `config/settings.json`
+holds only model settings. A personal profile, if used locally, goes in `inputs/personal_profile.json`,
+which is ignored by git; `inputs/personal_profile_template.json` shows its shape with made-up values.
+Long term the household side comes from the UIP instead.
+
+## Layout
+
+The V10 module layout is kept as it was (`config/`, `data_sources/`, `features/`, `models/`, `scoring/`,
+`decision/`, `validation/`, `exports/`, `run_forecast.py`, `update_data.py`). `baseline/v10-2026-09-13/`
+holds the run used for the reproduction gate: market-side outputs and the input files filtered to the rows
+V10 actually reads (verified to give identical data layers). Household outputs are not committed.

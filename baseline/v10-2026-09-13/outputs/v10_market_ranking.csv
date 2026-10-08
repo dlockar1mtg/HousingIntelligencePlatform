@@ -1,0 +1,3 @@
+market,market_ranking_score,current_entry_score,current_signal,predicted_12m_growth_pct,forecast_confidence_score,affordability_score,risk_score,best_simulated_entry_score,best_simulated_window_months,prob_neutral_or_better_at_best_window,prob_slight_buy_or_better_at_best_window,market_rank
+Wichita Composite,58.16806374985504,49.88170731707317,Neutral / Fair Value,2.9459046899401393,78.2474056143736,19.756097560975608,17.804878048780488,54.09448719512196,36,0.808,0.193,1
+DFW Composite,50.885066713949364,45.84329268292683,Slight Wait,0.7292196166109987,70.89804586359932,25.36585365853658,25.365853658536594,47.593755487804884,36,0.489,0.036,2

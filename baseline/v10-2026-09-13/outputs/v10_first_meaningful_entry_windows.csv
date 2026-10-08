@@ -1,0 +1,3 @@
+market,current_entry_score,current_signal,current_prob_neutral_or_better,current_prob_slight_buy_or_better,first_meaningful_window_months,first_meaningful_window_label,projected_entry_score,projected_signal,projected_prob_neutral_or_better,projected_prob_slight_buy_or_better,entry_score_improvement,neutral_prob_improvement,slight_buy_prob_improvement,selection_reason
+DFW Composite,45.94483048780487,Slight Wait,0.132,0.0,6,6 months,46.430243902439024,Slight Wait,0.356,0.0,0.4854134146341522,0.22399999999999998,0.0,First meaningful improvement
+Wichita Composite,52.72603902439024,Neutral / Fair Value,0.9965,0.0,12,12 months,53.77971890243902,Neutral / Fair Value,0.9245,0.0545,1.0536798780487828,-0.07200000000000006,0.0545,First meaningful improvement

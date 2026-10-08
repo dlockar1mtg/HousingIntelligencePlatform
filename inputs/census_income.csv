@@ -1,0 +1,3 @@
+date,market,median_household_income,population_weighted,source
+2024-12-31,DFW Composite,92043.86,True,ACS 2024 5-year county-weighted composite
+2024-12-31,Wichita Composite,70719.59,True,ACS 2024 5-year county-weighted composite
