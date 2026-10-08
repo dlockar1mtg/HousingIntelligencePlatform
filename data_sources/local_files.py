@@ -5,7 +5,7 @@ import numpy as np
 from pathlib import Path
 
 from config.markets import MARKETS
-from config.utils import INPUT_DIR, clean_name, log
+from config.utils import INPUT_DIR, clean_name, is_v11, log
 
 def detect_date_column(df: pd.DataFrame):
     candidates = ["date", "Date", "period", "Period", "month", "Month", "quarter", "Quarter", "time", "Time", "observation_date"]
@@ -46,6 +46,16 @@ def market_from_text(value) -> str | None:
                 return market
     return None
 
+def market_from_metro_name(value) -> str | None:
+    """V11: a metro-level file row belongs to a market only if its name is one of the market's metro names."""
+    if not is_v11():
+        return market_from_text(value)
+    cleaned = clean_name(value)
+    for market, config in MARKETS.items():
+        if cleaned in config.get("metro_names", []):
+            return market
+    return None
+
 def find_input_files(keywords: list[str]) -> list[Path]:
     return [p for p in INPUT_DIR.glob("*.csv") if any(k.lower() in p.name.lower() for k in keywords)]
 
@@ -61,7 +71,7 @@ def load_wide_zillow_file(path: Path, value_name: str) -> pd.DataFrame:
         log(f"Skipping {path.name}: could not infer market column.")
         return pd.DataFrame()
 
-    raw["market"] = raw[market_col].apply(market_from_text)
+    raw["market"] = raw[market_col].apply(market_from_metro_name)
     raw = raw.dropna(subset=["market"])
     if raw.empty:
         return pd.DataFrame()
@@ -170,7 +180,7 @@ def load_realtor_layer() -> pd.DataFrame:
             continue
 
         raw["date"] = parse_date_series(raw[date_col])
-        raw["market"] = raw[market_col].apply(market_from_text)
+        raw["market"] = raw[market_col].apply(market_from_metro_name)
         raw = raw.dropna(subset=["date", "market"])
 
         metrics = [
@@ -269,7 +279,9 @@ def load_affordability_layer() -> pd.DataFrame:
     outputs = []
     for market in combined["market"].unique():
         m = combined[combined["market"] == market].set_index("date").sort_index()
-        q = m[["median_household_income"]].resample("QE").mean().ffill().bfill()
+        q = m[["median_household_income"]].resample("QE").mean().ffill()
+        if not is_v11():
+            q = q.bfill()
         q["market"] = market
         outputs.append(q)
 
@@ -285,7 +297,11 @@ def merge_optional_layer(base: pd.DataFrame, market_name: str, optional: pd.Data
     # V6 fix: align annual/irregular optional data to the full quarterly model index.
     # This prevents Census income from disappearing because it only has one annual row.
     m = m[~m.index.duplicated(keep="last")]
-    m = m.reindex(base.index.union(m.index)).sort_index().ffill().bfill()
-    m = m.reindex(base.index).ffill().bfill()
+    if is_v11():                                   # V11: carry values forward only; nothing before a source starts
+        m = m.reindex(base.index.union(m.index)).sort_index().ffill()
+        m = m.reindex(base.index).ffill()
+    else:
+        m = m.reindex(base.index.union(m.index)).sort_index().ffill().bfill()
+        m = m.reindex(base.index).ffill().bfill()
 
     return base.join(m, how="left")

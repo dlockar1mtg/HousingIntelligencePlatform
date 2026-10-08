@@ -61,7 +61,47 @@ def fetch_census_county(year: int, fips: str, api_key: str):
     except Exception:
         return None
 
+def market_income_rows(county_df: pd.DataFrame) -> pd.DataFrame:
+    """Population-weighted market income, one row per market and ACS year."""
+    rows = []
+    for (market_name, year), group in county_df.groupby(["market", "year"]):
+        valid = group.dropna(subset=["median_household_income", "population"])
+        if valid.empty:
+            continue
+        weighted = (valid["median_household_income"] * valid["population"]).sum() / valid["population"].sum()
+        rows.append({"date": f"{int(year)}-12-31", "market": market_name, "median_household_income": round(weighted, 2),
+                     "population_weighted": True, "counties": len(valid),
+                     "source": f"ACS {int(year)} 5-year county-weighted composite"})
+    return pd.DataFrame(rows)
+
+
+def download_census_income_history(first_year: int = 2009) -> pd.DataFrame:
+    """V11: every ACS 5-year release from first_year, so affordability has real history."""
+    api_key = get_census_api_key()
+    if not api_key:
+        raise RuntimeError("Census API key missing. Set CENSUS_API_KEY.")
+    rows = []
+    for market_name, market_config in MARKETS.items():
+        for county_name, county_config in market_config["counties"].items():
+            for year in range(first_year, CURRENT_YEAR):
+                row = fetch_census_county(year, county_config["fips"], api_key)
+                if row is not None:
+                    rows.append({**row, "market": market_name, "county": county_name})
+                time.sleep(0.05)
+    if not rows:
+        raise RuntimeError("No Census income rows downloaded.")
+    county_df = pd.DataFrame(rows)
+    county_df.to_csv(INPUT_DIR / "census_income_county_detail.csv", index=False)
+    market_df = market_income_rows(county_df)
+    market_df.to_csv(INPUT_DIR / "census_income.csv", index=False)
+    log(f"Census income history: {len(county_df)} county-years, {market_df['date'].min()} to {market_df['date'].max()}")
+    return market_df
+
+
 def download_census_income() -> pd.DataFrame:
+    from config.utils import is_v11
+    if is_v11():
+        return download_census_income_history()
     api_key = get_census_api_key()
     if not api_key:
         raise RuntimeError(

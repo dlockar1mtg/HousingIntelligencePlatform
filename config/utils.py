@@ -22,6 +22,15 @@ def load_settings() -> dict:
         return {}
     return json.loads(path.read_text(encoding="utf-8"))
 
+def model_version() -> str:
+    """V10 reproduces the 2026-09-13 baseline exactly; V11 applies the review fixes (docs/V11_PLAN.md)."""
+    return (os.environ.get("HOUSING_MODEL_VERSION") or load_settings().get("model_version") or "V10").strip().upper()
+
+
+def is_v11() -> bool:
+    return model_version() == "V11"
+
+
 def get_census_api_key() -> str:
     env = os.environ.get("CENSUS_API_KEY", "").strip()
     if env:

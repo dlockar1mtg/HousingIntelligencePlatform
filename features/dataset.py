@@ -3,7 +3,7 @@ from __future__ import annotations
 import pandas as pd
 
 from config.markets import MARKETS
-from config.utils import log
+from config.utils import is_v11, log
 from data_sources.fred_loader import (
     download_national, download_target_hpi, download_market_metro_series,
     download_county_layer
@@ -42,11 +42,12 @@ def build_dataset() -> tuple[pd.DataFrame, pd.DataFrame]:
         df = merge_optional_layer(df, market_name, realtor)
         df = merge_optional_layer(df, market_name, affordability)
 
-        df = df.ffill().bfill()
+        df = df.ffill() if is_v11() else df.ffill().bfill()
         df["market"] = market_name
         df = add_features(df)
 
-        required = ["hpi", "target_4q_growth", "mortgage_30yr", "ten_year", "fed_funds", "cpi"]
+        # V11 keeps the newest quarters, whose 4-quarter target is not realized yet: they are what gets scored.
+        required = ["hpi", "mortgage_30yr", "ten_year", "fed_funds", "cpi"] + ([] if is_v11() else ["target_4q_growth"])
         df = df.dropna(subset=required)
 
         log(f"{market_name}: {df.shape[0]} usable rows")

@@ -20,6 +20,7 @@ MARKETS = {
             "sedgwick county, ks", "butler county", "butler county, ks",
             "harvey county", "harvey county, ks", "sumner county", "sumner county, ks",
         ],
+        "metro_names": ["wichita ks"],                      # V11: exact Zillow / Realtor.com metro names
         "hpi_target_series": "ATNHPIUS48620Q",
         "metro_unemployment": "WICH620URN",
         "metro_payrolls": "WICH620NAN",
@@ -40,6 +41,7 @@ MARKETS = {
             "tarrant", "collin", "denton", "rockwall", "kaufman",
             "ellis", "johnson", "parker", "wise", "hunt",
         ],
+        "metro_names": ["dallas tx", "dallas fort worth arlington tx"],
         "target_components": {
             "Dallas-Plano-Irving": "ATNHPIUS19124Q",
             "Fort Worth-Arlington-Grapevine": "ATNHPIUS23104Q",

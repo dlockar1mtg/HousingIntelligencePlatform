@@ -6,6 +6,12 @@ import pytest
 from scoring.entry_score import add_entry_scores, signal_rank, signal_strength
 
 
+@pytest.fixture(autouse=True)
+def _v10(monkeypatch):
+    """These tests pin V10's behaviour (the 2026-09-13 baseline); production runs V11."""
+    monkeypatch.setenv("HOUSING_MODEL_VERSION", "V10")
+
+
 @pytest.mark.parametrize("score,signal", [(85, "Strong Buy"), (84.99, "Buy"), (72, "Buy"), (60, "Slight Buy"),
                                           (48, "Neutral / Fair Value"), (47.9, "Slight Wait"), (36, "Slight Wait"),
                                           (24, "Wait"), (23.9, "Strong Wait / High Risk")])

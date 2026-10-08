@@ -1,4 +1,4 @@
-"""Build housing_uip_contract.json from a V10 run's outputs: the small, versioned file the UIP reads.
+"""Build housing_uip_contract.json from a V10 or V11 run's outputs: the small, versioned file the UIP reads.
 
 Only market-side facts are published. Household figures (financing scenarios, readiness) stay out:
 the UIP owns the household plan and will supply it through a profile contract instead.
@@ -13,15 +13,23 @@ from pathlib import Path
 
 import pandas as pd
 
-CONTRACT_VERSION = "1.0.0"
-MODEL_VERSION = "V10"
+CONTRACT_VERSION = "1.1.0"          # 1.1: model_version V11, out-of-sample calibration, walk_forward block
 STALE_AFTER_MONTHS = 6
-KNOWN_ISSUES = [
-    "MARKET_STATE_IS_LAST_QUARTER_WITH_A_REALIZED_TARGET",
-    "ALIAS_MATCHING_INCLUDES_UNRELATED_METROS",
-    "WALK_FORWARD_VALIDATION_OVERLAPS_TARGETS",
-    "CALIBRATION_IS_IN_SAMPLE",
-]
+KNOWN_ISSUES = {
+    "V10": [
+        "MARKET_STATE_IS_LAST_QUARTER_WITH_A_REALIZED_TARGET",
+        "ALIAS_MATCHING_INCLUDES_UNRELATED_METROS",
+        "WALK_FORWARD_VALIDATION_OVERLAPS_TARGETS",
+        "CALIBRATION_IS_IN_SAMPLE",
+        "OPTIONAL_LAYERS_BACKFILLED",
+    ],
+    # V11 fixes the five review findings (docs/V11_RESULTS.md); what remains is stated, not fixed.
+    "V11": [
+        "ENTRY_SCORE_IS_NOT_A_VALIDATED_TIMING_SIGNAL",
+        "SHORT_HISTORY_LAYERS_LEFT_OUT_OF_THE_MODEL",
+    ],
+}
+WALK_FORWARD_GAP_QUARTERS = {"V10": 0, "V11": 3}
 
 
 def _clean(value):
@@ -44,7 +52,26 @@ def _months_between(a: str, b: str) -> int:
     return (db.year - da.year) * 12 + db.month - da.month
 
 
-def build_contract(outputs: Path, *, source_commit: str, run_id: str | None = None, generated_at: str | None = None) -> dict:
+def _calibration(cal) -> dict | None:
+    if cal is None:
+        return None
+    out = {"status": "PASS" if bool(cal["calibration_pass"]) else "FAIL",
+           "correlation": _clean(round(float(cal["entry_score_future_growth_correlation"]), 3)),
+           "rank_correlation": _clean(round(float(cal["entry_score_future_growth_rank_correlation"]), 3)),
+           "in_sample": bool(cal["in_sample"]) if "in_sample" in cal and cal["in_sample"] == cal["in_sample"] else True}
+    if not out["in_sample"]:
+        out.update(method=str(cal.get("method") or "OUT_OF_SAMPLE"), quarters=int(cal["observations"]),
+                   mean_growth_neutral_or_better=_clean(round(float(cal["mean_growth_neutral_or_better"]), 4)),
+                   mean_growth_below_neutral=_clean(round(float(cal["mean_growth_below_neutral"]), 4)),
+                   pass_marks={"min_quarters": 40, "min_rank_correlation": 0.10, "neutral_or_better_grows_at_least_as_fast": True})
+    return out
+
+
+def build_contract(outputs: Path, *, source_commit: str, run_id: str | None = None, generated_at: str | None = None,
+                   model_version: str | None = None) -> dict:
+    if model_version is None:
+        from config.utils import model_version as configured
+        model_version = configured()
     outputs = Path(outputs)
     latest = _read(outputs, "v10_latest_forecast.csv").set_index("market")
     history = pd.read_csv(outputs / "v10_full_history.csv", index_col=0, parse_dates=True)
@@ -81,16 +108,18 @@ def build_contract(outputs: Path, *, source_commit: str, run_id: str | None = No
             "market_ranking_score": _clean(round(float(rk["market_ranking_score"]), 3)) if "market_ranking_score" in rk else None,
             "hpi": _clean(float(row["hpi"])), "hpi_yoy": _clean(float(row["hpi_yoy_pct"]) / 100),
             "predicted_12m_growth": round(float(row["predicted_12m_growth_pct"]) / 100, 5),
+            "prediction_basis": str(hist["prediction_basis"].iloc[-1]) if "prediction_basis" in hist and len(hist) else "FINAL_MODEL_IN_SAMPLE",
             "realized_growth_for_that_period": _clean(float(hist["target_4q_growth"].iloc[-1])) if len(hist) else None,
             "forecast_confidence": _clean(round(float(row["forecast_confidence_score"]), 2)),
             "walk_forward_mae": _clean(round(float(bt["absolute_error"].mean()), 4)) if len(bt) else None,
+            "walk_forward": {"quarters": len(bt), "gap_quarters": WALK_FORWARD_GAP_QUARTERS.get(model_version, 0),
+                             "mae": _clean(round(float(bt["absolute_error"].mean()), 4)),
+                             "direction_accuracy": _clean(round(float(bt["direction_correct"].mean()), 3)) if "direction_correct" in bt else None}
+                            if len(bt) else None,
             "mortgage_30yr": _clean(round(float(row["mortgage_30yr"]), 3)),
             "zillow_zhvi": _clean(round(float(row["zillow_zhvi"]), 0)) if "zillow_zhvi" in row else None,
             "payment_to_income_ratio": _clean(round(float(row["payment_to_income_ratio"]), 4)) if "payment_to_income_ratio" in row else None,
-            "calibration": None if cal is None else {"status": "PASS" if bool(cal["calibration_pass"]) else "FAIL",
-                                                     "correlation": _clean(round(float(cal["entry_score_future_growth_correlation"]), 3)),
-                                                     "rank_correlation": _clean(round(float(cal["entry_score_future_growth_rank_correlation"]), 3)),
-                                                     "in_sample": True},
+            "calibration": _calibration(cal),
             "best_window": None if bw is None else {"months": int(bw["best_entry_window_months"]),
                                                     "expected_entry_score": round(float(bw["best_expected_entry_score"]), 3),
                                                     "prob_neutral_or_better": float(bw["prob_neutral_or_better"]),
@@ -110,7 +139,7 @@ def build_contract(outputs: Path, *, source_commit: str, run_id: str | None = No
     return {
         "contract_version": CONTRACT_VERSION,
         "domain": "housing",
-        "model_version": MODEL_VERSION,
+        "model_version": model_version,
         "generated_at_utc": generated_at or datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
         "source_repository": "dlockar1mtg/HousingIntelligencePlatform",
         "source_commit": source_commit,
@@ -119,7 +148,7 @@ def build_contract(outputs: Path, *, source_commit: str, run_id: str | None = No
         "data_freshness": data_dates,
         "latest_input_observation": latest_input,
         "markets": markets,
-        "known_issues": KNOWN_ISSUES,
+        "known_issues": KNOWN_ISSUES.get(model_version, KNOWN_ISSUES["V10"]),
         "warnings": ([f"MARKET_STATE_OLDER_THAN_{STALE_AFTER_MONTHS}_MONTHS: {', '.join(stale)}"] if stale else []),
         "household": None,
         "automatic_execution_authorized": False,

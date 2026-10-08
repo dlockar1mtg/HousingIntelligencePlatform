@@ -1,5 +1,5 @@
 name: Housing production
-# Weekly: refresh Zillow / Realtor.com / Census, run V10 on live FRED, build and validate the UIP contract,
+# Weekly: refresh Zillow / Realtor.com / Census, run the configured model (V11) on live FRED, build and validate the UIP contract,
 # publish it as the housing-production-<run> artifact, and keep the monitoring state in state/.
 on:
   schedule:
@@ -51,7 +51,8 @@ jobs:
             [ -f inputs/$f.csv ] || gunzip -c baseline/v10-2026-09-13/inputs/$f.csv.gz > inputs/$f.csv   # first run: seed with the baseline
           done
           python -c "from data_sources.market_file_updater import refresh_market_files; refresh_market_files()"
-          python -c "from data_sources.census_loader import download_census_income; download_census_income()" || echo "::warning title=Census::refresh failed; the committed Census income files are used"
+          # V11 downloads every ACS 5-year release from 2009; on failure the committed yearly history is used.
+          python -c "from data_sources.census_loader import download_census_income; download_census_income()" || { echo "::warning title=Census::refresh failed; the committed Census income files are used"; git checkout -- inputs/census_income.csv inputs/census_income_county_detail.csv; }
           python - <<'PY'
           import pandas as pd, sys
           r = pd.read_csv("outputs/v10_data_freshness_report.csv")
@@ -60,7 +61,7 @@ jobs:
           if not (r["wichita_coverage"].eq("PASS").all() and r["dfw_coverage"].eq("PASS").all()):
               sys.exit("market coverage failed: not running the forecast")
           PY
-      - name: Run V10 on live FRED
+      - name: Run the model on live FRED (config/settings.json model_version)
         if: steps.gate.outputs.run == 'true'
         run: |
           cp state/v9_monitoring_history.csv state/v9_monitoring_current_snapshot.csv outputs/

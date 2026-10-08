@@ -1,3 +1,33 @@
-date,market,median_household_income,population_weighted,source
-2024-12-31,DFW Composite,92043.86,True,ACS 2024 5-year county-weighted composite
-2024-12-31,Wichita Composite,70719.59,True,ACS 2024 5-year county-weighted composite
+date,market,median_household_income,population_weighted,counties,source
+2009-12-31,DFW Composite,56670.3,True,11,ACS 2009 5-year county-weighted composite
+2010-12-31,DFW Composite,57515.43,True,11,ACS 2010 5-year county-weighted composite
+2011-12-31,DFW Composite,58909.11,True,11,ACS 2011 5-year county-weighted composite
+2012-12-31,DFW Composite,59448.9,True,11,ACS 2012 5-year county-weighted composite
+2013-12-31,DFW Composite,59717.47,True,11,ACS 2013 5-year county-weighted composite
+2014-12-31,DFW Composite,60477.11,True,11,ACS 2014 5-year county-weighted composite
+2015-12-31,DFW Composite,61119.38,True,11,ACS 2015 5-year county-weighted composite
+2016-12-31,DFW Composite,62549.48,True,11,ACS 2016 5-year county-weighted composite
+2017-12-31,DFW Composite,65283.63,True,11,ACS 2017 5-year county-weighted composite
+2018-12-31,DFW Composite,68404.63,True,11,ACS 2018 5-year county-weighted composite
+2019-12-31,DFW Composite,71502.81,True,11,ACS 2019 5-year county-weighted composite
+2020-12-31,DFW Composite,74437.07,True,11,ACS 2020 5-year county-weighted composite
+2021-12-31,DFW Composite,78436.87,True,11,ACS 2021 5-year county-weighted composite
+2022-12-31,DFW Composite,85231.6,True,11,ACS 2022 5-year county-weighted composite
+2023-12-31,DFW Composite,89074.76,True,11,ACS 2023 5-year county-weighted composite
+2024-12-31,DFW Composite,92043.86,True,11,ACS 2024 5-year county-weighted composite
+2009-12-31,Wichita Composite,48662.92,True,4,ACS 2009 5-year county-weighted composite
+2010-12-31,Wichita Composite,48745.74,True,4,ACS 2010 5-year county-weighted composite
+2011-12-31,Wichita Composite,50225.99,True,4,ACS 2011 5-year county-weighted composite
+2012-12-31,Wichita Composite,50567.77,True,4,ACS 2012 5-year county-weighted composite
+2013-12-31,Wichita Composite,50506.5,True,4,ACS 2013 5-year county-weighted composite
+2014-12-31,Wichita Composite,51033.92,True,4,ACS 2014 5-year county-weighted composite
+2015-12-31,Wichita Composite,51537.6,True,4,ACS 2015 5-year county-weighted composite
+2016-12-31,Wichita Composite,52182.54,True,4,ACS 2016 5-year county-weighted composite
+2017-12-31,Wichita Composite,53981.02,True,4,ACS 2017 5-year county-weighted composite
+2018-12-31,Wichita Composite,55897.15,True,4,ACS 2018 5-year county-weighted composite
+2019-12-31,Wichita Composite,57411.38,True,4,ACS 2019 5-year county-weighted composite
+2020-12-31,Wichita Composite,58391.86,True,4,ACS 2020 5-year county-weighted composite
+2021-12-31,Wichita Composite,61551.41,True,4,ACS 2021 5-year county-weighted composite
+2022-12-31,Wichita Composite,66734.26,True,4,ACS 2022 5-year county-weighted composite
+2023-12-31,Wichita Composite,69042.96,True,4,ACS 2023 5-year county-weighted composite
+2024-12-31,Wichita Composite,70719.59,True,4,ACS 2024 5-year county-weighted composite
