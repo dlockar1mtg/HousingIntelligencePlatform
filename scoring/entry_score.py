@@ -13,54 +13,56 @@ def point_in_time_percentile(series: pd.Series, higher_is_better: bool = True) -
     pct = series.expanding().rank(pct=True) * 100
     return pct if higher_is_better else 100 - pct
 
-def safe_score(data: pd.DataFrame, col: str, higher_is_better: bool = True) -> pd.Series:
+def safe_score(data: pd.DataFrame, col: str, higher_is_better: bool = True, point_in_time: bool | None = None) -> pd.Series:
     if col not in data.columns:
         return pd.Series(50, index=data.index)
-    if is_v11():
+    if (is_v11() if point_in_time is None else point_in_time):
         return data.groupby("market")[col].transform(lambda x: point_in_time_percentile(x.sort_index(), higher_is_better).reindex(x.index)).fillna(50)
     return data.groupby("market")[col].transform(lambda x: percentile_score(x, higher_is_better)).fillna(50)
 
-def add_entry_scores(data: pd.DataFrame) -> pd.DataFrame:
+def add_entry_scores(data: pd.DataFrame, point_in_time: bool | None = None) -> pd.DataFrame:
     data = data.copy()
-    data["price_momentum_score"] = safe_score(data, "predicted_12m_growth", True)
+    _score = safe_score
+    safe_score_ = lambda d, c, h=True: _score(d, c, h, point_in_time)  # noqa: E731
+    data["price_momentum_score"] = safe_score_(data, "predicted_12m_growth", True)
 
     data["valuation_score"] = (
-        safe_score(data, "hpi_yoy", False) * 0.20
-        + safe_score(data, "hpi_5yr_growth", False) * 0.20
-        + safe_score(data, "composite_listing_price_yoy", False) * 0.20
-        + safe_score(data, "zillow_zhvi_yoy", False) * 0.20
-        + safe_score(data, "realtor_listing_price_yoy", False) * 0.20
+        safe_score_(data, "hpi_yoy", False) * 0.20
+        + safe_score_(data, "hpi_5yr_growth", False) * 0.20
+        + safe_score_(data, "composite_listing_price_yoy", False) * 0.20
+        + safe_score_(data, "zillow_zhvi_yoy", False) * 0.20
+        + safe_score_(data, "realtor_listing_price_yoy", False) * 0.20
     )
 
     data["supply_score"] = (
-        safe_score(data, "months_supply", True) * 0.20
-        + safe_score(data, "composite_active_listings_yoy", True) * 0.25
-        + safe_score(data, "realtor_active_listings_yoy", True) * 0.25
-        + safe_score(data, "realtor_dom_change_1yr", True) * 0.15
-        + safe_score(data, "composite_county_permits_yoy", True) * 0.15
+        safe_score_(data, "months_supply", True) * 0.20
+        + safe_score_(data, "composite_active_listings_yoy", True) * 0.25
+        + safe_score_(data, "realtor_active_listings_yoy", True) * 0.25
+        + safe_score_(data, "realtor_dom_change_1yr", True) * 0.15
+        + safe_score_(data, "composite_county_permits_yoy", True) * 0.15
     )
 
     data["economy_score"] = (
-        safe_score(data, "metro_unemployment", False) * 0.35
-        + safe_score(data, "metro_payroll_growth_yoy", True) * 0.35
-        + safe_score(data, "metro_labor_force_growth_yoy", True) * 0.30
+        safe_score_(data, "metro_unemployment", False) * 0.35
+        + safe_score_(data, "metro_payroll_growth_yoy", True) * 0.35
+        + safe_score_(data, "metro_labor_force_growth_yoy", True) * 0.30
     )
 
     data["mortgage_score"] = (
-        safe_score(data, "mortgage_30yr", False) * 0.45
-        + safe_score(data, "mortgage_change_4q", False) * 0.35
-        + safe_score(data, "mortgage_spread", False) * 0.20
+        safe_score_(data, "mortgage_30yr", False) * 0.45
+        + safe_score_(data, "mortgage_change_4q", False) * 0.35
+        + safe_score_(data, "mortgage_spread", False) * 0.20
     )
 
     data["affordability_score"] = (
-        safe_score(data, "payment_to_income_ratio", False) * 0.70
-        + safe_score(data, "payment_to_income_change_1yr", False) * 0.30
+        safe_score_(data, "payment_to_income_ratio", False) * 0.70
+        + safe_score_(data, "payment_to_income_change_1yr", False) * 0.30
     )
 
     data["risk_score"] = (
-        safe_score(data, "hpi_volatility_2yr", False) * 0.40
-        + safe_score(data, "metro_unemployment_change_1yr", False) * 0.30
-        + safe_score(data, "realtor_price_reduction_change_1yr", False) * 0.30
+        safe_score_(data, "hpi_volatility_2yr", False) * 0.40
+        + safe_score_(data, "metro_unemployment_change_1yr", False) * 0.30
+        + safe_score_(data, "realtor_price_reduction_change_1yr", False) * 0.30
     )
 
     data["entry_score"] = (

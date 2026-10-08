@@ -18,17 +18,17 @@ def create_model() -> RandomForestRegressor:
         n_jobs=settings.get("n_jobs", -1),               # parallel trees; results are identical for a fixed random_state
     )
 
-def walk_forward_validation(data: pd.DataFrame, features: list[str], target: str = TARGET) -> pd.DataFrame:
+def walk_forward_validation(data: pd.DataFrame, features: list[str], target: str = TARGET, gap: int | None = None) -> pd.DataFrame:
     rows = []
     min_train_rows = load_settings().get("model", {}).get("min_train_rows", 40)
 
     for market in data["market"].unique():
         m = data[data["market"] == market].sort_index()
         m = m.dropna(subset=[target]) if is_v11() else m.dropna(subset=features + [target])
-        gap = 3 if is_v11() else 0                   # V11: train only on rows whose 4-quarter target was known at the test quarter
+        g = (3 if is_v11() else 0) if gap is None else gap   # V11: train only on rows whose 4-quarter target was known at the test quarter
 
         for i in range(min_train_rows, len(m)):
-            train = m.iloc[:i - gap]
+            train = m.iloc[:i - g]
             test = m.iloc[[i]]
 
             model = create_model()
