@@ -39,7 +39,7 @@ jobs:
           from pandas_datareader import data as web
           out = Path("data/snapshot/rates"); out.mkdir(parents=True, exist_ok=True)
           for sid in ("DGS1", "DGS2", "DGS3", "DGS5", "DGS7", "DGS10", "DGS20", "DGS30", "MORTGAGE30US", "FEDTARMD", "FEDTARMDLR"):
-              df = web.DataReader(sid, "fred", "1962-01-01")
+              df = web.DataReader(sid, "fred", "1962-01-01", "2040-12-31")   # SEP projections are dated in future years
               df.to_csv(out / f"{sid}.csv"); print(sid, len(df), df.index.min().date(), df.index.max().date())
           PY
       - name: Download the ACS income history (2009 onward)

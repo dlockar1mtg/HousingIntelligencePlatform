@@ -228,7 +228,7 @@ def build(source) -> dict:
 
 def _fred(sid: str) -> pd.DataFrame:
     from pandas_datareader import data as web
-    return web.DataReader(sid, "fred", "1962-01-01")
+    return web.DataReader(sid, "fred", "1962-01-01", "2040-12-31")     # SEP projections are dated in future years
 
 
 def main(argv=None) -> int:
