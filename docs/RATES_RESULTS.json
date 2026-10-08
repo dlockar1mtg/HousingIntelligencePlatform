@@ -1,6 +1,6 @@
 {
  "method": "docs/RATES_PLAN.md",
- "generated_at_utc": "2026-10-08T18:39:45+00:00",
+ "generated_at_utc": "2026-10-08T18:44:10+00:00",
  "outlook": {
   "as_of_month": "2026-10",
   "mortgage_30yr_month_avg": 7.34,
@@ -806,7 +806,10 @@
  },
  "fomc_sep_context": {
   "fed_funds_median_by_year": {
-   "2026": 4.1
+   "2026": 4.1,
+   "2027": 4.1,
+   "2028": 3.9,
+   "2029": 3.6
   },
   "fed_funds_longer_run_median": 3.2,
   "longer_run_as_of": "2026-09-16",

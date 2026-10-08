@@ -9,8 +9,8 @@ all of this weekly on live FRED.
 - Mortgage spread over the 10-year: **1.97 points** (3-month average), against a long-run median of 1.68.
 - **The market's curve** implies a 10-year of 5.53% in three years. With today's spread that is a 30-year
   near **7.5%** in October 2029: the curve expects slightly higher rates, not lower.
-- **FOMC projections (context, not a forecast here):** a fed funds median of 4.1% for 2026 and 3.2% in the
-  longer run (SEP of Sep 16, 2026). These are the members' own projections, not market odds, and they
+- **FOMC projections (context, not a forecast here):** fed funds medians of 4.1% (2026), 4.1% (2027),
+  3.9% (2028), 3.6% (2029) and 3.2% in the longer run (SEP of Sep 16, 2026). These are the members' own projections, not market odds, and they
   describe the overnight rate, not the 10-year that mortgages follow.
 
 ## The test (monthly origins 1985–2023, 466 at 36 months)
