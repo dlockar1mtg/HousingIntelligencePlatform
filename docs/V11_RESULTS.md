@@ -24,6 +24,11 @@ come from `scripts/compare_versions.py`, and the full output is in `V11_RESULTS.
 | DFW typical home value (Zillow) | $280,794 | **$366,794** |
 | DFW payment-to-income | 0.191 | **0.240** |
 
+`compare_versions.py` scores the latest quarter against a history of final-model predictions. Production
+(`run_forecast.py`) uses walk-forward predictions for the history behind each percentile, as change 4 specifies.
+So the published V11 scores differ slightly. The PR's live-FRED V11 check gave **Wichita 44.6 and DFW 42.0**,
+both still Slight Wait, with the same forecasts, errors and calibration.
+
 The home values show the alias problem directly. V10's "Wichita" averaged Wichita, KS with Wichita Falls, TX,
 and its "DFW" mixed Dallas with Huntsville, Fort Collins, Johnson City, Parkersburg and others. V11 reads only
 the real metros. The 2025-06-30 forecast that V10 published on 2026-09-13 can now be checked against what actually happened
