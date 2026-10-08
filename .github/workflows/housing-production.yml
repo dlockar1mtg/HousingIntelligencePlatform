@@ -66,6 +66,9 @@ jobs:
         run: |
           cp state/v9_monitoring_history.csv state/v9_monitoring_current_snapshot.csv outputs/
           python run_forecast.py | tee forecast.log
+      - name: Mortgage-rate outlook (live FRED; docs/RATES_PLAN.md)
+        if: steps.gate.outputs.run == 'true'
+        run: python -m rates.outlook --out outputs/rates_outlook.json --notice
       - name: Build and validate the UIP contract
         if: steps.gate.outputs.run == 'true'
         run: python publish_uip.py --package uip-package | tee publish.log && echo "::notice title=Housing contract::$(tail -1 publish.log | cut -c1-400)"

@@ -1,0 +1,818 @@
+{
+ "method": "docs/RATES_PLAN.md",
+ "generated_at_utc": "2026-10-08T18:44:10+00:00",
+ "outlook": {
+  "as_of_month": "2026-10",
+  "mortgage_30yr_month_avg": 7.34,
+  "mortgage_30yr_latest_weekly": {
+   "date": "2026-10-08",
+   "rate": 7.4
+  },
+  "treasury_10y": 5.28,
+  "spread_3m": 1.97,
+  "spread_long_run_median": 1.68,
+  "forward_10y_in_36m": 5.53,
+  "horizons": [
+   {
+    "months": 6,
+    "month": "2027-04",
+    "rule": "NO_CHANGE",
+    "center": 7.34,
+    "no_change": 7.34,
+    "curve_forward": 7.31,
+    "curve_forward_long_spread": 7.01,
+    "status": "TOO_WIDE",
+    "band_coverage_10_90": 0.901,
+    "p10": 6.49,
+    "p25": 6.88,
+    "p50": 7.28,
+    "p75": 7.75,
+    "p90": 8.24
+   },
+   {
+    "months": 12,
+    "month": "2027-10",
+    "rule": "NO_CHANGE",
+    "center": 7.34,
+    "no_change": 7.34,
+    "curve_forward": 7.37,
+    "curve_forward_long_spread": 7.08,
+    "status": "TOO_WIDE",
+    "band_coverage_10_90": 0.931,
+    "p10": 6.17,
+    "p25": 6.67,
+    "p50": 7.2,
+    "p75": 7.94,
+    "p90": 8.65
+   },
+   {
+    "months": 18,
+    "month": "2028-04",
+    "rule": "NO_CHANGE",
+    "center": 7.34,
+    "no_change": 7.34,
+    "curve_forward": 7.41,
+    "curve_forward_long_spread": 7.12,
+    "status": "TOO_WIDE",
+    "band_coverage_10_90": 0.93,
+    "p10": 5.91,
+    "p25": 6.47,
+    "p50": 7.14,
+    "p75": 7.95,
+    "p90": 9.15
+   },
+   {
+    "months": 24,
+    "month": "2028-10",
+    "rule": "NO_CHANGE",
+    "center": 7.34,
+    "no_change": 7.34,
+    "curve_forward": 7.44,
+    "curve_forward_long_spread": 7.14,
+    "status": "TESTED",
+    "band_coverage_10_90": 0.881,
+    "p10": 5.62,
+    "p25": 6.24,
+    "p50": 7.13,
+    "p75": 7.96,
+    "p90": 9.49
+   },
+   {
+    "months": 30,
+    "month": "2029-04",
+    "rule": "NO_CHANGE",
+    "center": 7.34,
+    "no_change": 7.34,
+    "curve_forward": 7.47,
+    "curve_forward_long_spread": 7.18,
+    "status": "TESTED",
+    "band_coverage_10_90": 0.888,
+    "p10": 5.17,
+    "p25": 6.1,
+    "p50": 7.09,
+    "p75": 7.95,
+    "p90": 9.76
+   },
+   {
+    "months": 36,
+    "month": "2029-10",
+    "rule": "NO_CHANGE",
+    "center": 7.34,
+    "no_change": 7.34,
+    "curve_forward": 7.51,
+    "curve_forward_long_spread": 7.21,
+    "status": "TESTED",
+    "band_coverage_10_90": 0.886,
+    "p10": 4.98,
+    "p25": 5.96,
+    "p50": 7.08,
+    "p75": 7.96,
+    "p90": 10.12
+   },
+   {
+    "months": 42,
+    "month": "2030-04",
+    "rule": "NO_CHANGE",
+    "center": 7.34,
+    "no_change": 7.34,
+    "curve_forward": 7.55,
+    "curve_forward_long_spread": 7.25,
+    "status": "TESTED",
+    "band_coverage_10_90": 0.887,
+    "p10": 4.75,
+    "p25": 5.88,
+    "p50": 7.04,
+    "p75": 8.0,
+    "p90": 10.39
+   },
+   {
+    "months": 48,
+    "month": "2030-10",
+    "rule": "NO_CHANGE",
+    "center": 7.34,
+    "no_change": 7.34,
+    "curve_forward": 7.59,
+    "curve_forward_long_spread": 7.29,
+    "status": "TESTED",
+    "band_coverage_10_90": 0.885,
+    "p10": 4.73,
+    "p25": 5.75,
+    "p50": 6.98,
+    "p75": 7.97,
+    "p90": 10.6
+   },
+   {
+    "months": 54,
+    "month": "2031-04",
+    "rule": "NO_CHANGE",
+    "center": 7.34,
+    "no_change": 7.34,
+    "curve_forward": 7.63,
+    "curve_forward_long_spread": 7.33,
+    "status": "TESTED",
+    "band_coverage_10_90": 0.879,
+    "p10": 4.51,
+    "p25": 5.69,
+    "p50": 6.8,
+    "p75": 8.22,
+    "p90": 10.59
+   },
+   {
+    "months": 60,
+    "month": "2031-10",
+    "rule": "NO_CHANGE",
+    "center": 7.34,
+    "no_change": 7.34,
+    "curve_forward": 7.67,
+    "curve_forward_long_spread": 7.37,
+    "status": "TOO_WIDE",
+    "band_coverage_10_90": 0.919,
+    "p10": 4.47,
+    "p25": 5.63,
+    "p50": 6.65,
+    "p75": 8.34,
+    "p90": 10.72
+   }
+  ]
+ },
+ "test": {
+  "6": {
+   "horizon_months": 6,
+   "origins_tested": 496,
+   "effective_independent_tests": 82.7,
+   "first_origin": "1985-01",
+   "last_origin": "2026-04",
+   "rules": {
+    "NO_CHANGE": {
+     "n": 496,
+     "mae": 0.497,
+     "median_abs_error": 0.412,
+     "mean_error": -0.075
+    },
+    "CURVE_FORWARD": {
+     "n": 496,
+     "mae": 0.524,
+     "median_abs_error": 0.443,
+     "mean_error": -0.16
+    },
+    "CURVE_FORWARD_LONG_SPREAD": {
+     "n": 496,
+     "mae": 0.586,
+     "median_abs_error": 0.48,
+     "mean_error": 0.047
+    }
+   },
+   "published_mae": 0.513,
+   "rule_chosen_share": {
+    "CURVE_FORWARD": 0.038,
+    "NO_CHANGE": 0.849,
+    "CURVE_FORWARD_LONG_SPREAD": 0.113
+   },
+   "band_coverage_10_90": 0.901,
+   "band_tests": 496,
+   "status": "TOO_WIDE",
+   "mae_by_period": {
+    "1985-1989": {
+     "NO_CHANGE": 0.724,
+     "CURVE_FORWARD": 0.744,
+     "CURVE_FORWARD_LONG_SPREAD": 0.712
+    },
+    "1990-1999": {
+     "NO_CHANGE": 0.54,
+     "CURVE_FORWARD": 0.572,
+     "CURVE_FORWARD_LONG_SPREAD": 0.702
+    },
+    "2000-2009": {
+     "NO_CHANGE": 0.407,
+     "CURVE_FORWARD": 0.45,
+     "CURVE_FORWARD_LONG_SPREAD": 0.395
+    },
+    "2010-2019": {
+     "NO_CHANGE": 0.372,
+     "CURVE_FORWARD": 0.411,
+     "CURVE_FORWARD_LONG_SPREAD": 0.389
+    },
+    "2020-2029": {
+     "NO_CHANGE": 0.587,
+     "CURVE_FORWARD": 0.57,
+     "CURVE_FORWARD_LONG_SPREAD": 0.919
+    }
+   }
+  },
+  "12": {
+   "horizon_months": 12,
+   "origins_tested": 490,
+   "effective_independent_tests": 40.8,
+   "first_origin": "1985-01",
+   "last_origin": "2025-10",
+   "rules": {
+    "NO_CHANGE": {
+     "n": 490,
+     "mae": 0.705,
+     "median_abs_error": 0.597,
+     "mean_error": -0.146
+    },
+    "CURVE_FORWARD": {
+     "n": 490,
+     "mae": 0.777,
+     "median_abs_error": 0.668,
+     "mean_error": -0.319
+    },
+    "CURVE_FORWARD_LONG_SPREAD": {
+     "n": 490,
+     "mae": 0.825,
+     "median_abs_error": 0.641,
+     "mean_error": -0.114
+    }
+   },
+   "published_mae": 0.733,
+   "rule_chosen_share": {
+    "CURVE_FORWARD": 0.363,
+    "CURVE_FORWARD_LONG_SPREAD": 0.002,
+    "NO_CHANGE": 0.635
+   },
+   "band_coverage_10_90": 0.931,
+   "band_tests": 490,
+   "status": "TOO_WIDE",
+   "mae_by_period": {
+    "1985-1989": {
+     "NO_CHANGE": 0.888,
+     "CURVE_FORWARD": 0.881,
+     "CURVE_FORWARD_LONG_SPREAD": 1.044
+    },
+    "1990-1999": {
+     "NO_CHANGE": 0.844,
+     "CURVE_FORWARD": 0.912,
+     "CURVE_FORWARD_LONG_SPREAD": 1.031
+    },
+    "2000-2009": {
+     "NO_CHANGE": 0.531,
+     "CURVE_FORWARD": 0.679,
+     "CURVE_FORWARD_LONG_SPREAD": 0.488
+    },
+    "2010-2019": {
+     "NO_CHANGE": 0.527,
+     "CURVE_FORWARD": 0.624,
+     "CURVE_FORWARD_LONG_SPREAD": 0.62
+    },
+    "2020-2029": {
+     "NO_CHANGE": 0.914,
+     "CURVE_FORWARD": 0.889,
+     "CURVE_FORWARD_LONG_SPREAD": 1.216
+    }
+   }
+  },
+  "18": {
+   "horizon_months": 18,
+   "origins_tested": 484,
+   "effective_independent_tests": 26.9,
+   "first_origin": "1985-01",
+   "last_origin": "2025-04",
+   "rules": {
+    "NO_CHANGE": {
+     "n": 484,
+     "mae": 0.856,
+     "median_abs_error": 0.702,
+     "mean_error": -0.195
+    },
+    "CURVE_FORWARD": {
+     "n": 484,
+     "mae": 0.947,
+     "median_abs_error": 0.805,
+     "mean_error": -0.438
+    },
+    "CURVE_FORWARD_LONG_SPREAD": {
+     "n": 484,
+     "mae": 0.971,
+     "median_abs_error": 0.757,
+     "mean_error": -0.239
+    }
+   },
+   "published_mae": 0.902,
+   "rule_chosen_share": {
+    "CURVE_FORWARD": 0.386,
+    "NO_CHANGE": 0.614
+   },
+   "band_coverage_10_90": 0.93,
+   "band_tests": 484,
+   "status": "TOO_WIDE",
+   "mae_by_period": {
+    "1985-1989": {
+     "NO_CHANGE": 0.918,
+     "CURVE_FORWARD": 0.98,
+     "CURVE_FORWARD_LONG_SPREAD": 1.062
+    },
+    "1990-1999": {
+     "NO_CHANGE": 0.981,
+     "CURVE_FORWARD": 1.05,
+     "CURVE_FORWARD_LONG_SPREAD": 1.158
+    },
+    "2000-2009": {
+     "NO_CHANGE": 0.674,
+     "CURVE_FORWARD": 0.874,
+     "CURVE_FORWARD_LONG_SPREAD": 0.611
+    },
+    "2010-2019": {
+     "NO_CHANGE": 0.646,
+     "CURVE_FORWARD": 0.75,
+     "CURVE_FORWARD_LONG_SPREAD": 0.778
+    },
+    "2020-2029": {
+     "NO_CHANGE": 1.296,
+     "CURVE_FORWARD": 1.229,
+     "CURVE_FORWARD_LONG_SPREAD": 1.57
+    }
+   }
+  },
+  "24": {
+   "horizon_months": 24,
+   "origins_tested": 478,
+   "effective_independent_tests": 19.9,
+   "first_origin": "1985-01",
+   "last_origin": "2024-10",
+   "rules": {
+    "NO_CHANGE": {
+     "n": 478,
+     "mae": 0.954,
+     "median_abs_error": 0.731,
+     "mean_error": -0.238
+    },
+    "CURVE_FORWARD": {
+     "n": 478,
+     "mae": 1.069,
+     "median_abs_error": 0.951,
+     "mean_error": -0.54
+    },
+    "CURVE_FORWARD_LONG_SPREAD": {
+     "n": 478,
+     "mae": 1.08,
+     "median_abs_error": 0.955,
+     "mean_error": -0.347
+    }
+   },
+   "published_mae": 1.057,
+   "rule_chosen_share": {
+    "CURVE_FORWARD_LONG_SPREAD": 0.485,
+    "CURVE_FORWARD": 0.123,
+    "NO_CHANGE": 0.391
+   },
+   "band_coverage_10_90": 0.881,
+   "band_tests": 478,
+   "status": "TESTED",
+   "mae_by_period": {
+    "1985-1989": {
+     "NO_CHANGE": 1.01,
+     "CURVE_FORWARD": 1.068,
+     "CURVE_FORWARD_LONG_SPREAD": 1.164
+    },
+    "1990-1999": {
+     "NO_CHANGE": 0.918,
+     "CURVE_FORWARD": 1.012,
+     "CURVE_FORWARD_LONG_SPREAD": 1.102
+    },
+    "2000-2009": {
+     "NO_CHANGE": 0.833,
+     "CURVE_FORWARD": 1.054,
+     "CURVE_FORWARD_LONG_SPREAD": 0.766
+    },
+    "2010-2019": {
+     "NO_CHANGE": 0.685,
+     "CURVE_FORWARD": 0.859,
+     "CURVE_FORWARD_LONG_SPREAD": 0.887
+    },
+    "2020-2029": {
+     "NO_CHANGE": 1.781,
+     "CURVE_FORWARD": 1.657,
+     "CURVE_FORWARD_LONG_SPREAD": 1.995
+    }
+   }
+  },
+  "30": {
+   "horizon_months": 30,
+   "origins_tested": 472,
+   "effective_independent_tests": 15.7,
+   "first_origin": "1985-01",
+   "last_origin": "2024-04",
+   "rules": {
+    "NO_CHANGE": {
+     "n": 472,
+     "mae": 1.034,
+     "median_abs_error": 0.823,
+     "mean_error": -0.279
+    },
+    "CURVE_FORWARD": {
+     "n": 472,
+     "mae": 1.19,
+     "median_abs_error": 1.026,
+     "mean_error": -0.642
+    },
+    "CURVE_FORWARD_LONG_SPREAD": {
+     "n": 472,
+     "mae": 1.189,
+     "median_abs_error": 1.046,
+     "mean_error": -0.459
+    }
+   },
+   "published_mae": 1.104,
+   "rule_chosen_share": {
+    "CURVE_FORWARD_LONG_SPREAD": 0.513,
+    "NO_CHANGE": 0.487
+   },
+   "band_coverage_10_90": 0.888,
+   "band_tests": 472,
+   "status": "TESTED",
+   "mae_by_period": {
+    "1985-1989": {
+     "NO_CHANGE": 1.042,
+     "CURVE_FORWARD": 1.131,
+     "CURVE_FORWARD_LONG_SPREAD": 1.226
+    },
+    "1990-1999": {
+     "NO_CHANGE": 0.919,
+     "CURVE_FORWARD": 1.044,
+     "CURVE_FORWARD_LONG_SPREAD": 1.12
+    },
+    "2000-2009": {
+     "NO_CHANGE": 1.007,
+     "CURVE_FORWARD": 1.256,
+     "CURVE_FORWARD_LONG_SPREAD": 0.981
+    },
+    "2010-2019": {
+     "NO_CHANGE": 0.694,
+     "CURVE_FORWARD": 0.964,
+     "CURVE_FORWARD_LONG_SPREAD": 0.954
+    },
+    "2020-2029": {
+     "NO_CHANGE": 2.139,
+     "CURVE_FORWARD": 1.964,
+     "CURVE_FORWARD_LONG_SPREAD": 2.33
+    }
+   }
+  },
+  "36": {
+   "horizon_months": 36,
+   "origins_tested": 466,
+   "effective_independent_tests": 12.9,
+   "first_origin": "1985-01",
+   "last_origin": "2023-10",
+   "rules": {
+    "NO_CHANGE": {
+     "n": 466,
+     "mae": 1.117,
+     "median_abs_error": 0.875,
+     "mean_error": -0.331
+    },
+    "CURVE_FORWARD": {
+     "n": 466,
+     "mae": 1.303,
+     "median_abs_error": 1.208,
+     "mean_error": -0.748
+    },
+    "CURVE_FORWARD_LONG_SPREAD": {
+     "n": 466,
+     "mae": 1.287,
+     "median_abs_error": 1.154,
+     "mean_error": -0.576
+    }
+   },
+   "published_mae": 1.171,
+   "rule_chosen_share": {
+    "CURVE_FORWARD_LONG_SPREAD": 0.455,
+    "NO_CHANGE": 0.545
+   },
+   "band_coverage_10_90": 0.886,
+   "band_tests": 466,
+   "status": "TESTED",
+   "mae_by_period": {
+    "1985-1989": {
+     "NO_CHANGE": 1.234,
+     "CURVE_FORWARD": 1.381,
+     "CURVE_FORWARD_LONG_SPREAD": 1.398
+    },
+    "1990-1999": {
+     "NO_CHANGE": 0.921,
+     "CURVE_FORWARD": 1.061,
+     "CURVE_FORWARD_LONG_SPREAD": 1.117
+    },
+    "2000-2009": {
+     "NO_CHANGE": 1.158,
+     "CURVE_FORWARD": 1.435,
+     "CURVE_FORWARD_LONG_SPREAD": 1.159
+    },
+    "2010-2019": {
+     "NO_CHANGE": 0.726,
+     "CURVE_FORWARD": 1.049,
+     "CURVE_FORWARD_LONG_SPREAD": 1.043
+    },
+    "2020-2029": {
+     "NO_CHANGE": 2.385,
+     "CURVE_FORWARD": 2.149,
+     "CURVE_FORWARD_LONG_SPREAD": 2.556
+    }
+   }
+  },
+  "42": {
+   "horizon_months": 42,
+   "origins_tested": 460,
+   "effective_independent_tests": 11.0,
+   "first_origin": "1985-01",
+   "last_origin": "2023-04",
+   "rules": {
+    "NO_CHANGE": {
+     "n": 460,
+     "mae": 1.173,
+     "median_abs_error": 0.901,
+     "mean_error": -0.378
+    },
+    "CURVE_FORWARD": {
+     "n": 460,
+     "mae": 1.413,
+     "median_abs_error": 1.362,
+     "mean_error": -0.847
+    },
+    "CURVE_FORWARD_LONG_SPREAD": {
+     "n": 460,
+     "mae": 1.389,
+     "median_abs_error": 1.296,
+     "mean_error": -0.689
+    }
+   },
+   "published_mae": 1.252,
+   "rule_chosen_share": {
+    "CURVE_FORWARD_LONG_SPREAD": 0.278,
+    "CURVE_FORWARD": 0.004,
+    "NO_CHANGE": 0.717
+   },
+   "band_coverage_10_90": 0.887,
+   "band_tests": 460,
+   "status": "TESTED",
+   "mae_by_period": {
+    "1985-1989": {
+     "NO_CHANGE": 1.457,
+     "CURVE_FORWARD": 1.593,
+     "CURVE_FORWARD_LONG_SPREAD": 1.607
+    },
+    "1990-1999": {
+     "NO_CHANGE": 0.941,
+     "CURVE_FORWARD": 1.14,
+     "CURVE_FORWARD_LONG_SPREAD": 1.217
+    },
+    "2000-2009": {
+     "NO_CHANGE": 1.235,
+     "CURVE_FORWARD": 1.569,
+     "CURVE_FORWARD_LONG_SPREAD": 1.282
+    },
+    "2010-2019": {
+     "NO_CHANGE": 0.697,
+     "CURVE_FORWARD": 1.122,
+     "CURVE_FORWARD_LONG_SPREAD": 1.09
+    },
+    "2020-2029": {
+     "NO_CHANGE": 2.688,
+     "CURVE_FORWARD": 2.372,
+     "CURVE_FORWARD_LONG_SPREAD": 2.793
+    }
+   }
+  },
+  "48": {
+   "horizon_months": 48,
+   "origins_tested": 454,
+   "effective_independent_tests": 9.5,
+   "first_origin": "1985-01",
+   "last_origin": "2022-10",
+   "rules": {
+    "NO_CHANGE": {
+     "n": 454,
+     "mae": 1.237,
+     "median_abs_error": 0.926,
+     "mean_error": -0.436
+    },
+    "CURVE_FORWARD": {
+     "n": 454,
+     "mae": 1.542,
+     "median_abs_error": 1.45,
+     "mean_error": -0.952
+    },
+    "CURVE_FORWARD_LONG_SPREAD": {
+     "n": 454,
+     "mae": 1.499,
+     "median_abs_error": 1.429,
+     "mean_error": -0.806
+    }
+   },
+   "published_mae": 1.259,
+   "rule_chosen_share": {
+    "CURVE_FORWARD": 0.037,
+    "CURVE_FORWARD_LONG_SPREAD": 0.048,
+    "NO_CHANGE": 0.914
+   },
+   "band_coverage_10_90": 0.885,
+   "band_tests": 454,
+   "status": "TESTED",
+   "mae_by_period": {
+    "1985-1989": {
+     "NO_CHANGE": 1.712,
+     "CURVE_FORWARD": 1.886,
+     "CURVE_FORWARD_LONG_SPREAD": 1.898
+    },
+    "1990-1999": {
+     "NO_CHANGE": 0.931,
+     "CURVE_FORWARD": 1.206,
+     "CURVE_FORWARD_LONG_SPREAD": 1.271
+    },
+    "2000-2009": {
+     "NO_CHANGE": 1.238,
+     "CURVE_FORWARD": 1.694,
+     "CURVE_FORWARD_LONG_SPREAD": 1.406
+    },
+    "2010-2019": {
+     "NO_CHANGE": 0.811,
+     "CURVE_FORWARD": 1.258,
+     "CURVE_FORWARD_LONG_SPREAD": 1.219
+    },
+    "2020-2029": {
+     "NO_CHANGE": 2.978,
+     "CURVE_FORWARD": 2.583,
+     "CURVE_FORWARD_LONG_SPREAD": 2.912
+    }
+   }
+  },
+  "54": {
+   "horizon_months": 54,
+   "origins_tested": 448,
+   "effective_independent_tests": 8.3,
+   "first_origin": "1985-01",
+   "last_origin": "2022-04",
+   "rules": {
+    "NO_CHANGE": {
+     "n": 448,
+     "mae": 1.332,
+     "median_abs_error": 0.958,
+     "mean_error": -0.509
+    },
+    "CURVE_FORWARD": {
+     "n": 448,
+     "mae": 1.688,
+     "median_abs_error": 1.606,
+     "mean_error": -1.064
+    },
+    "CURVE_FORWARD_LONG_SPREAD": {
+     "n": 448,
+     "mae": 1.608,
+     "median_abs_error": 1.433,
+     "mean_error": -0.927
+    }
+   },
+   "published_mae": 1.431,
+   "rule_chosen_share": {
+    "CURVE_FORWARD": 0.06,
+    "NO_CHANGE": 0.783,
+    "CURVE_FORWARD_LONG_SPREAD": 0.156
+   },
+   "band_coverage_10_90": 0.879,
+   "band_tests": 448,
+   "status": "TESTED",
+   "mae_by_period": {
+    "1985-1989": {
+     "NO_CHANGE": 1.932,
+     "CURVE_FORWARD": 2.165,
+     "CURVE_FORWARD_LONG_SPREAD": 2.028
+    },
+    "1990-1999": {
+     "NO_CHANGE": 1.002,
+     "CURVE_FORWARD": 1.345,
+     "CURVE_FORWARD_LONG_SPREAD": 1.408
+    },
+    "2000-2009": {
+     "NO_CHANGE": 1.279,
+     "CURVE_FORWARD": 1.811,
+     "CURVE_FORWARD_LONG_SPREAD": 1.518
+    },
+    "2010-2019": {
+     "NO_CHANGE": 0.938,
+     "CURVE_FORWARD": 1.397,
+     "CURVE_FORWARD_LONG_SPREAD": 1.342
+    },
+    "2020-2029": {
+     "NO_CHANGE": 3.373,
+     "CURVE_FORWARD": 2.858,
+     "CURVE_FORWARD_LONG_SPREAD": 3.093
+    }
+   }
+  },
+  "60": {
+   "horizon_months": 60,
+   "origins_tested": 442,
+   "effective_independent_tests": 7.4,
+   "first_origin": "1985-01",
+   "last_origin": "2021-10",
+   "rules": {
+    "NO_CHANGE": {
+     "n": 442,
+     "mae": 1.387,
+     "median_abs_error": 1.078,
+     "mean_error": -0.599
+    },
+    "CURVE_FORWARD": {
+     "n": 442,
+     "mae": 1.785,
+     "median_abs_error": 1.668,
+     "mean_error": -1.185
+    },
+    "CURVE_FORWARD_LONG_SPREAD": {
+     "n": 442,
+     "mae": 1.69,
+     "median_abs_error": 1.64,
+     "mean_error": -1.048
+    }
+   },
+   "published_mae": 1.551,
+   "rule_chosen_share": {
+    "CURVE_FORWARD": 0.081,
+    "CURVE_FORWARD_LONG_SPREAD": 0.38,
+    "NO_CHANGE": 0.538
+   },
+   "band_coverage_10_90": 0.919,
+   "band_tests": 442,
+   "status": "TOO_WIDE",
+   "mae_by_period": {
+    "1985-1989": {
+     "NO_CHANGE": 1.999,
+     "CURVE_FORWARD": 2.264,
+     "CURVE_FORWARD_LONG_SPREAD": 2.013
+    },
+    "1990-1999": {
+     "NO_CHANGE": 1.075,
+     "CURVE_FORWARD": 1.467,
+     "CURVE_FORWARD_LONG_SPREAD": 1.535
+    },
+    "2000-2009": {
+     "NO_CHANGE": 1.305,
+     "CURVE_FORWARD": 1.936,
+     "CURVE_FORWARD_LONG_SPREAD": 1.644
+    },
+    "2010-2019": {
+     "NO_CHANGE": 1.084,
+     "CURVE_FORWARD": 1.513,
+     "CURVE_FORWARD_LONG_SPREAD": 1.461
+    },
+    "2020-2029": {
+     "NO_CHANGE": 3.522,
+     "CURVE_FORWARD": 2.883,
+     "CURVE_FORWARD_LONG_SPREAD": 3.16
+    }
+   }
+  }
+ },
+ "fomc_sep_context": {
+  "fed_funds_median_by_year": {
+   "2026": 4.1,
+   "2027": 4.1,
+   "2028": 3.9,
+   "2029": 3.6
+  },
+  "fed_funds_longer_run_median": 3.2,
+  "longer_run_as_of": "2026-09-16",
+  "note": "FOMC participants' own projections of the appropriate fed funds rate; not market odds and not mortgage rates."
+ }
+}
