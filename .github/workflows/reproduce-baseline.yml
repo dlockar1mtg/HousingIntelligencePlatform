@@ -2,14 +2,20 @@ name: Reproduce the V10 baseline and check V11
 # Phase 2 gate, online half: rebuild the 2026-09-13 run from live FRED plus the committed baseline input
 # files and check it lands in the same decision state. No personal profile is used, so the household
 # outputs are skipped; the market side is what is compared.
+# Each run is two ~40-minute jobs (about 80 billed minutes), so it no longer runs on every push to a pull
+# request: add the label "reproduce" to the pull request (or run it by hand) when a change needs the check.
 on:
   workflow_dispatch:
   pull_request:
-    paths: ["baseline/**", "config/**", "inputs/**", "publication/**", "validation/**", "data_sources/**", "features/**", "models/**", "scoring/**", "run_forecast.py", ".github/workflows/reproduce-baseline.yml"]
+    types: [labeled]
 permissions:
   contents: read
+concurrency:
+  group: reproduce-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
 jobs:
   reproduce:
+    if: github.event_name != 'pull_request' || github.event.label.name == 'reproduce'
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     defaults:
@@ -60,6 +66,7 @@ jobs:
           retention-days: 14
 
   v11:
+    if: github.event_name != 'pull_request' || github.event.label.name == 'reproduce'
     # The production model (V11.1) on live FRED with the baseline market files: builds and validates the contract.
     runs-on: ubuntu-24.04
     timeout-minutes: 90
