@@ -11,6 +11,9 @@ permissions:
 jobs:
   snapshot:
     runs-on: ubuntu-24.04
+    defaults:
+      run:
+        shell: bash          # explicit bash runs with -o pipefail, so a failing command before a pipe fails the step
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

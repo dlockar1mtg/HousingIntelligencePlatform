@@ -1,5 +1,5 @@
 {
-  "model_version": "V11",
+  "model_version": "V11.1",
   "start_date": "2000-01-01",
   "model": {
     "random_state": 42,

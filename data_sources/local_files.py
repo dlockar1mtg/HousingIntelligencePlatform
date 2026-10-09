@@ -5,7 +5,11 @@ import numpy as np
 from pathlib import Path
 
 from config.markets import MARKETS
-from config.utils import INPUT_DIR, clean_name, is_v11, log
+from config.utils import INPUT_DIR, clean_name, is_v11, is_v11_1, log
+
+# V11.1 (audit finding 4): an ACS 5-year estimate is dated 31 December of its last year but released about
+# twelve months later (ACS 2024 5-year: December 2025). Date each value when it became available.
+ACS_RELEASE_LAG_MONTHS = 12
 
 def detect_date_column(df: pd.DataFrame):
     candidates = ["date", "Date", "period", "Period", "month", "Month", "quarter", "Quarter", "time", "Time", "observation_date"]
@@ -264,6 +268,8 @@ def load_affordability_layer() -> pd.DataFrame:
         raw["median_household_income"] = pd.to_numeric(raw["median_household_income"].astype(str).str.replace(",", "", regex=False), errors="coerce")
         raw = raw.dropna(subset=["date", "market", "median_household_income"])
         raw = raw[raw["market"].isin(MARKETS.keys())]
+        if is_v11_1():
+            raw["date"] = raw["date"] + pd.DateOffset(months=ACS_RELEASE_LAG_MONTHS)
 
         if raw.empty:
             log(f"Skipping {path.name}: no rows matched configured market names.")

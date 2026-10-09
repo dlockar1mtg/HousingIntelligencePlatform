@@ -27,8 +27,17 @@ def model_version() -> str:
     return (os.environ.get("HOUSING_MODEL_VERSION") or load_settings().get("model_version") or "V10").strip().upper()
 
 
+KNOWN_VERSIONS = ("V10", "V11", "V11.1")
+
+
 def is_v11() -> bool:
-    return model_version() == "V11"
+    """V11 behaviour (docs/V11_PLAN.md). V11.1 keeps all of it and adds the audit amendments."""
+    return model_version() in ("V11", "V11.1")
+
+
+def is_v11_1() -> bool:
+    """V11.1: the amendments from the 2026-10-09 system audit (docs/V11_RESULTS.md, "V11.1 amendments")."""
+    return model_version() == "V11.1"
 
 
 def get_census_api_key() -> str:

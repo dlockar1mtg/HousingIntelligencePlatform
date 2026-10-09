@@ -137,7 +137,7 @@ def build_combined_score(latest, profile, ranking):
         rows.append({"market":market,"market_entry_score":entry,"market_signal":r.get("entry_signal",signal_strength(entry)),"market_ranking_score":rank,"personal_readiness_score":ps,"personal_readiness_label":p["label"],"forecast_confidence_score":conf,"combined_purchase_readiness_score":combined,"overall_recommendation":rec,"comfortable_purchase_price":p["comfortable_price"],"profile_target_purchase_price":target,"estimated_back_end_dti":p["dti"],"cash_gap":p["cash_gap"]})
     return pd.DataFrame(rows).sort_values("combined_purchase_readiness_score",ascending=False)
 
-def build_alerts(latest, monitoring, meaningful):
+def build_alerts(latest, monitoring, meaningful, timing_advice=True):
     rows=[]
     for _,r in latest.iterrows():
         market=r["market"]; score=n(r.get("entry_score"),50); signal=r.get("entry_signal",signal_strength(score))
@@ -146,10 +146,18 @@ def build_alerts(latest, monitoring, meaningful):
     if monitoring is not None and not monitoring.empty:
         for _,r in monitoring.iterrows():
             market=r["market"]; sc=n(r.get("entry_score_change_since_last_run")); mc=n(r.get("mortgage_30yr_change_since_last_run")); fc=n(r.get("predicted_12m_growth_pct_change_since_last_run"))
+            if "comparable_with_prior_run" in r.index and not bool(r["comparable_with_prior_run"]) and pd.notna(r["model_version_prior"]):
+                rows.append({"market":market,"severity":"Informational","alert_type":"Model Version Change","message":f"{market}: the model changed from {r['model_version_prior']} to {r['model_version']} since the last run, so changes are not compared."})
             if abs(sc)>=3: rows.append({"market":market,"severity":"High","alert_type":"Entry Score Change","message":f"{market} entry score changed by {sc:+.1f}."})
-            if abs(mc)>=.25: rows.append({"market":market,"severity":"Medium","alert_type":"Mortgage Rate Change","message":f"Mortgage rate changed by {mc:+.2f} points."})
+            if abs(mc)>=.25:
+                prior=n(r.get("mortgage_30yr_prior"),np.nan); now=n(r.get("mortgage_30yr"),np.nan)
+                detail=f" ({prior:.2f}% to {now:.2f}%)" if prior==prior and now==now else ""
+                rows.append({"market":market,"severity":"Medium","alert_type":"Mortgage Rate Change","message":f"Mortgage rate changed by {mc:+.2f} points{detail}."})
             if abs(fc)>=1: rows.append({"market":market,"severity":"Medium","alert_type":"Forecast Change","message":f"{market} forecast changed by {fc:+.1f} points."})
     if meaningful is not None and not meaningful.empty:
         for _,r in meaningful.iterrows():
-            rows.append({"market":r["market"],"severity":"Informational","alert_type":"Projected Opportunity Window","message":f"{r['market']} first meaningful improvement: {r['first_meaningful_window_label']}."})
+            if timing_advice:
+                rows.append({"market":r["market"],"severity":"Informational","alert_type":"Projected Opportunity Window","message":f"{r['market']} first meaningful improvement: {r['first_meaningful_window_label']}."})
+            else:   # V11.1: scenario output, not timing advice (the Entry Score failed its timing test)
+                rows.append({"market":r["market"],"severity":"Informational","alert_type":"Simulated Score Path","message":f"{r['market']}: the simulated Entry Score first improves meaningfully at {r['first_meaningful_window_label']}. This is scenario output, not timing advice."})
     return pd.DataFrame(rows)

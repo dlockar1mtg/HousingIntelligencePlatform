@@ -75,6 +75,29 @@ def market_income_rows(county_df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+class CensusCoverageError(RuntimeError):
+    pass
+
+
+def check_county_coverage(county_df: pd.DataFrame) -> None:
+    """Audit finding 5: a market's income is a population-weighted average of its counties, so a year with
+    some counties missing would silently describe a different area. Every configured county must be present
+    in every ACS year that was downloaded; a year missing for all counties is allowed only at the newest end
+    (a release not out yet). Raises CensusCoverageError otherwise."""
+    if county_df.empty:
+        raise CensusCoverageError("no Census county rows")
+    years = sorted(int(y) for y in county_df["year"].unique())
+    for market_name, market_config in MARKETS.items():
+        expected = {c["fips"] for c in market_config["counties"].values()}
+        got = county_df[county_df["market"] == market_name]
+        for year in range(years[0], years[-1] + 1):
+            have = set(got.loc[got["year"].astype(int) == year, "fips"].astype(str).str.zfill(5))
+            if have != expected:
+                short = sorted(expected - have)
+                raise CensusCoverageError(f"{market_name} ACS {year}: {len(have)} of {len(expected)} counties"
+                                          + (f" (missing {', '.join(short)})" if short else ""))
+
+
 def download_census_income_history(first_year: int = 2009) -> pd.DataFrame:
     """V11: every ACS 5-year release from first_year, so affordability has real history."""
     api_key = get_census_api_key()
@@ -91,6 +114,7 @@ def download_census_income_history(first_year: int = 2009) -> pd.DataFrame:
     if not rows:
         raise RuntimeError("No Census income rows downloaded.")
     county_df = pd.DataFrame(rows)
+    check_county_coverage(county_df)          # before anything is written: a short year fails the refresh
     county_df.to_csv(INPUT_DIR / "census_income_county_detail.csv", index=False)
     market_df = market_income_rows(county_df)
     market_df.to_csv(INPUT_DIR / "census_income.csv", index=False)

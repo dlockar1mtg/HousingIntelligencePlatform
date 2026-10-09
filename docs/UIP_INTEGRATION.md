@@ -21,3 +21,15 @@ a live mortgage rate instead of the 6.5% placeholder, Wichita and DFW market car
   direction_accuracy}. `calibration` carries `in_sample: false`, the method, `quarters`, both growth means
   and the registered `pass_marks`. The validator refuses a V11 contract with an in-sample calibration. The
   UIP accepts any 1.x contract.
+- **1.3.0** (V11.1, 2026-10-09), backward compatible. `model_version` is `V11.1` (the amendments from the
+  2026-10-09 system audit, `docs/V11_RESULTS.md`). New: top-level `rate_features_as_of` (the mortgage, 10-year
+  and fed funds observations the scored quarter uses, with dates) and `data_ages` (each source's newest
+  observation, age in days, warning age and limit); `data_freshness` also lists every FRED series as
+  `"FRED <id>": date`. Per market: `rate_features_as_of`, `trigger.mortgage_rate_now` / `mortgage_rate_as_of`,
+  outlook rows gain `growth_median` and `mortgage_p10/p50/p90`. **`best_window` is `null`**: the Entry Score
+  failed its timing test, so no "best window" is published as advice. The highest simulated score horizon is
+  in `simulated_score_peak` with `timing_advice: false` and a note. `warnings` now carries missing input series
+  (`MISSING_INPUT_SERIES`), score inputs that fell back to a neutral 50 (`NEUTRAL_50_SCORE_INPUTS`) and stale
+  sources (`STALE_INPUT`). The validator refuses a V11.1 contract whose scored mortgage rate differs from
+  `rate_features_as_of` or from the rates outlook's latest weekly rate, or that carries a `best_window`.
+  The UIP importer reads none of the removed values (its Best window tile shows "—" when the field is null).

@@ -12,6 +12,9 @@ jobs:
   reproduce:
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash          # explicit bash runs with -o pipefail, so `cmd | tee log` fails when cmd fails
     env:
       HOUSING_MODEL_VERSION: V10      # the baseline is V10; production runs V11 (config/settings.json)
     steps:
@@ -57,11 +60,14 @@ jobs:
           retention-days: 14
 
   v11:
-    # The production model on live FRED with the baseline market files: builds and validates the 1.1 contract.
+    # The production model (V11.1) on live FRED with the baseline market files: builds and validates the contract.
     runs-on: ubuntu-24.04
     timeout-minutes: 90
+    defaults:
+      run:
+        shell: bash          # explicit bash runs with -o pipefail, so `cmd | tee log` fails when cmd fails
     env:
-      HOUSING_MODEL_VERSION: V11
+      HOUSING_MODEL_VERSION: V11.1
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -71,7 +77,9 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Install the baseline market files (Census income is the committed yearly history)
         run: for f in zhvi_metro zori_metro realtor_inventory; do gunzip -c baseline/v10-2026-09-13/inputs/$f.csv.gz > inputs/$f.csv; done
-      - name: Run V11 (live FRED)
+      - name: Mortgage-rate outlook (live FRED); the V11.1 Monte Carlo draws rates from it
+        run: python -m rates.outlook --out outputs/rates_outlook.json
+      - name: Run V11.1 (live FRED)
         run: python run_forecast.py | tee forecast.log
       - name: Build and validate the contract
         run: |
@@ -81,7 +89,7 @@ jobs:
           c = json.load(open("uip-package/housing_uip_contract.json"))
           for m in c["markets"]:
               cal, wf = m["calibration"], m.get("walk_forward") or {}
-              print(f"::notice title={m['market']} V11::{m['market_state_as_of']} score {m['entry_score']} {m['signal']} | next 12m {m['predicted_12m_growth']:+.2%} | walk-forward MAE {wf.get('mae')} over {wf.get('quarters')} quarters | timing test {cal['status']} rank {cal.get('rank_correlation')} over {cal.get('quarters')} quarters")
+              print(f"::notice title={m['market']} {c['model_version']}::{m['market_state_as_of']} score {m['entry_score']} {m['signal']} at {m['mortgage_30yr']}% ({m.get('rate_features_as_of')}) | next 12m {m['predicted_12m_growth']:+.2%} | walk-forward MAE {wf.get('mae')} over {wf.get('quarters')} quarters | timing test {cal['status']} rank {cal.get('rank_correlation')} over {cal.get('quarters')} quarters")
           print(f"::notice title=Contract::{c['contract_version']} {c['model_version']} known issues {c['known_issues']} warnings {c['warnings']}")
           PY
       - uses: actions/upload-artifact@v4

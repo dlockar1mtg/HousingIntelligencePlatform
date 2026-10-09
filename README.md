@@ -17,14 +17,16 @@ Migrated from the local `HousingPredictorv6` project (V10) on 2026-10-07. See `d
 | 3 | Tests and CI | `Tests` workflow |
 | 4 | `housing_uip_contract.json` (`publication/`, `publish_uip.py`) and the weekly `Housing production` workflow | built |
 | 5 | UIP consumer (Homestead) | in the UIP repo |
-| V11 | Fix the issues in `docs/MODEL_LIMITATIONS.md` | after integration, with before/after evidence |
+| V11 | Fix the issues in `docs/MODEL_LIMITATIONS.md` | done (`docs/V11_RESULTS.md`) |
+| V11.1 | Amendments from the 2026-10-09 system audit | production (`docs/V11_RESULTS.md`, "V11.1 amendments") |
 
 ## Running
 
 ```bash
 pip install -r requirements-dev.txt
 python update_data.py      # Zillow, Realtor.com and Census refresh (needs CENSUS_API_KEY)
-python run_forecast.py     # V10: FRED download, model, Monte Carlo, decision tools, outputs/
+python -m rates.outlook --out outputs/rates_outlook.json   # V11.1's Monte Carlo draws rates from it
+python run_forecast.py     # config/settings.json model_version (V11.1); HOUSING_MODEL_VERSION=V10 / V11 for the older versions
 python publish_uip.py      # build and validate uip-package/ (contract + manifest)
 python -m pytest -q
 ```

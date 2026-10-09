@@ -6,6 +6,11 @@ import pandas as pd
 from scoring.entry_score import signal_strength, signal_rank
 
 RANDOM_SEED = 42
+BAND_QUANTILES = (("p10", 0.10), ("p25", 0.25), ("p50", 0.50), ("p75", 0.75), ("p90", 0.90))
+Z90 = 1.2815515655446004            # standard normal 90th percentile
+SPREAD_CHANGE_SD = 0.10             # V11.1: sd of the mortgage-Treasury spread change per 6-month step (sqrt-scaled)
+NOT_TIMING_ADVICE = ("Scenario output, not timing advice: the Entry Score failed its out-of-sample timing test, "
+                     "and this is only the horizon whose simulated score distribution is highest.")
 
 SIGNAL_LEVELS = [
     "Strong Buy", "Buy", "Slight Buy", "Neutral / Fair Value",
@@ -105,6 +110,56 @@ def mortgage_payment(principal: float, annual_rate_pct: float, years: int = 30) 
     return principal * (monthly_rate * (1 + monthly_rate) ** n) / ((1 + monthly_rate) ** n - 1)
 
 
+def outlook_bands(rates_outlook: dict, horizons) -> dict[int, list[tuple[float, float]]]:
+    """V11.1 (audit finding 3): the mortgage-rate quantiles the published rates outlook gives for each
+    Monte Carlo horizon. Accepts the rates_outlook.json document or its `outlook` part. Every horizon > 0
+    must have a band; otherwise the simulation would have to invent rates, so it refuses."""
+    doc = rates_outlook.get("outlook", rates_outlook)
+    rows = {int(r["months"]): r for r in doc.get("horizons") or []}
+    out = {}
+    for h in horizons:
+        if h == 0:
+            continue
+        r = rows.get(int(h))
+        if r is None or any(r.get(k) is None for k, _ in BAND_QUANTILES):
+            raise ValueError(f"the rates outlook has no p10-p90 band for {h} months")
+        pts = [(q, float(r[k])) for k, q in BAND_QUANTILES]
+        if any(b[1] < a[1] for a, b in zip(pts, pts[1:])):
+            raise ValueError(f"the rates outlook band for {h} months is not ordered")
+        out[int(h)] = pts
+    return out
+
+
+def rate_at_quantile(points: list[tuple[float, float]], u: float) -> float:
+    """Inverse CDF through the published quantiles: linear between p10 and p90, and normal tails beyond
+    them scaled so the 10th / 90th percentiles land on p10 / p90 (a split normal around p50)."""
+    from statistics import NormalDist
+    (q_lo, lo), (q_hi, hi) = points[0], points[-1]
+    mid = dict(points).get(0.50)
+    if u < q_lo:
+        return max(0.0, mid + (mid - lo) / Z90 * NormalDist().inv_cdf(max(u, 1e-9)))
+    if u > q_hi:
+        return max(0.0, mid + (hi - mid) / Z90 * NormalDist().inv_cdf(min(u, 1 - 1e-9)))
+    return float(np.interp(u, [q for q, _ in points], [v for _, v in points]))
+
+
+def scenario_from_quantile(u: float) -> str:
+    """V11.1: the scenario follows the path's rate quantile (low rates are the Bull case), with the same
+    25 / 50 / 25 weights as before."""
+    bull = SCENARIO_PARAMETERS["Bull"]["weight"]
+    base = SCENARIO_PARAMETERS["Base"]["weight"]
+    total = sum(p["weight"] for p in SCENARIO_PARAMETERS.values())
+    return "Bull" if u < bull / total else "Base" if u < (bull + base) / total else "Bear"
+
+
+def _walk(rng: np.random.Generator, mean: float, sd: float, steps: float, sqrt_time: bool) -> float:
+    """A random-walk change over `steps` 6-month steps. V10/V11 scaled the whole draw by steps, so the spread
+    grew linearly with time; V11.1 scales the drift by steps and the dispersion by sqrt(steps)."""
+    if sqrt_time:
+        return mean * steps + rng.normal(0.0, sd) * np.sqrt(steps)
+    return rng.normal(mean, sd) * steps
+
+
 def sample_scenario(rng: np.random.Generator) -> str:
     names = list(SCENARIO_PARAMETERS.keys())
     weights = np.array([SCENARIO_PARAMETERS[n]["weight"] for n in names], dtype=float)
@@ -112,15 +167,28 @@ def sample_scenario(rng: np.random.Generator) -> str:
     return rng.choice(names, p=weights)
 
 
-def project_random_state(latest: pd.Series, hist: pd.DataFrame, scenario_name: str, horizon_months: int, rng: np.random.Generator) -> pd.Series:
+def project_random_state(latest: pd.Series, hist: pd.DataFrame, scenario_name: str, horizon_months: int, rng: np.random.Generator,
+                         mortgage_rate: float | None = None) -> pd.Series:
+    """One simulated market state `horizon_months` ahead. With `mortgage_rate` (V11.1) the mortgage rate is
+    the one drawn from the published rates outlook, the 10-year follows it at the current spread plus a
+    sqrt-scaled spread change, and every random walk's dispersion grows with sqrt(time)."""
     params = SCENARIO_PARAMETERS[scenario_name]
     steps = horizon_months / 6
     years = horizon_months / 12
     s = latest.copy()
+    amended = mortgage_rate is not None
 
-    mortgage_shift = rng.normal(params["mortgage_rate_shift_mean"], params["mortgage_rate_shift_sd"]) * steps
-    ten_year_shift = rng.normal(params["ten_year_shift_mean"], params["ten_year_shift_sd"]) * steps
-    fed_shift = rng.normal(params["fed_funds_shift_mean"], params["fed_funds_shift_sd"]) * steps
+    if amended:
+        current_m = _num(s.get("mortgage_30yr"), 0)
+        current_t = _num(s.get("ten_year"), 0)
+        mortgage_shift = (mortgage_rate - current_m) if horizon_months > 0 else 0.0
+        spread_change = _walk(rng, 0.0, SPREAD_CHANGE_SD, steps, True)
+        ten_year_shift = mortgage_shift - spread_change if current_t else 0.0
+        fed_shift = _walk(rng, params["fed_funds_shift_mean"], params["fed_funds_shift_sd"], steps, True)
+    else:
+        mortgage_shift = rng.normal(params["mortgage_rate_shift_mean"], params["mortgage_rate_shift_sd"]) * steps
+        ten_year_shift = rng.normal(params["ten_year_shift_mean"], params["ten_year_shift_sd"]) * steps
+        fed_shift = rng.normal(params["fed_funds_shift_mean"], params["fed_funds_shift_sd"]) * steps
 
     if "mortgage_30yr" in s.index:
         s["mortgage_30yr"] = max(0, _num(s["mortgage_30yr"], 0) + mortgage_shift)
@@ -144,7 +212,7 @@ def project_random_state(latest: pd.Series, hist: pd.DataFrame, scenario_name: s
         s["inflation_yoy"] = current_infl + (target - current_infl) * min(1, years / 2) + rng.normal(0, 0.004)
         s["inflation_trend"] = s["inflation_yoy"] - current_infl
 
-    unemployment_shift = rng.normal(params["unemployment_shift_mean"], params["unemployment_shift_sd"]) * steps
+    unemployment_shift = _walk(rng, params["unemployment_shift_mean"], params["unemployment_shift_sd"], steps, amended)
     if "metro_unemployment" in s.index:
         s["metro_unemployment"] = max(0, _num(s["metro_unemployment"], 4) + unemployment_shift)
         s["metro_unemployment_change_1yr"] = unemployment_shift / max(years, 0.5)
@@ -159,7 +227,7 @@ def project_random_state(latest: pd.Series, hist: pd.DataFrame, scenario_name: s
         scenario_adjust = 0.004 if scenario_name == "Bull" else 0.0 if scenario_name == "Base" else -0.004
         s["metro_labor_force_growth_yoy"] = current + scenario_adjust + rng.normal(0, 0.004)
 
-    inventory_growth = rng.normal(params["inventory_growth_mean"], params["inventory_growth_sd"]) * steps
+    inventory_growth = _walk(rng, params["inventory_growth_mean"], params["inventory_growth_sd"], steps, amended)
     if "realtor_active_listings" in s.index:
         current = _num(s["realtor_active_listings"], np.nan)
         hist_growth = _growth(hist.get("realtor_active_listings", pd.Series(dtype=float)), 4, 0.0)
@@ -171,7 +239,7 @@ def project_random_state(latest: pd.Series, hist: pd.DataFrame, scenario_name: s
     if "composite_active_listings_yoy" in s.index:
         s["composite_active_listings_yoy"] = _num(s.get("composite_active_listings_yoy"), 0) + inventory_growth
 
-    listing_shift = rng.normal(params["listing_price_growth_shift_mean"], params["listing_price_growth_shift_sd"]) * max(1, years)
+    listing_shift = _walk(rng, params["listing_price_growth_shift_mean"], params["listing_price_growth_shift_sd"], max(1, years), amended)
     if "realtor_median_listing_price" in s.index:
         current = _num(s["realtor_median_listing_price"], np.nan)
         hist_growth = _growth(hist.get("realtor_median_listing_price", pd.Series(dtype=float)), 4, 0.0)
@@ -208,13 +276,13 @@ def project_random_state(latest: pd.Series, hist: pd.DataFrame, scenario_name: s
     if "realtor_median_days_on_market" in s.index:
         current = _num(s["realtor_median_days_on_market"], 30)
         dom_change = 6 if scenario_name == "Bull" else 3 if scenario_name == "Base" else -1
-        s["realtor_median_days_on_market"] = max(0, current + rng.normal(dom_change, 3) * steps)
+        s["realtor_median_days_on_market"] = max(0, current + _walk(rng, dom_change, 3, steps, amended))
         s["realtor_dom_change_1yr"] = (s["realtor_median_days_on_market"] - current) / max(years, 0.5)
 
     if "realtor_price_reduction_share" in s.index:
         current = _num(s["realtor_price_reduction_share"], 0.0)
         shift = 0.015 if scenario_name == "Bull" else 0.005 if scenario_name == "Base" else -0.002
-        s["realtor_price_reduction_share"] = max(0, min(1, current + rng.normal(shift, 0.01) * steps))
+        s["realtor_price_reduction_share"] = max(0, min(1, current + _walk(rng, shift, 0.01, steps, amended)))
         s["realtor_price_reduction_change_1yr"] = (s["realtor_price_reduction_share"] - current) / max(years, 0.5)
 
     if "median_household_income" in s.index:
@@ -244,7 +312,7 @@ def project_random_state(latest: pd.Series, hist: pd.DataFrame, scenario_name: s
         current = _num(s["months_supply"], np.nan)
         shift = 0.20 if scenario_name == "Bull" else 0.05 if scenario_name == "Base" else -0.05
         if not np.isnan(current):
-            s["months_supply"] = max(0.5, current + rng.normal(shift, 0.10) * steps)
+            s["months_supply"] = max(0.5, current + _walk(rng, shift, 0.10, steps, amended))
             s["months_supply_change_1yr"] = (s["months_supply"] - current) / max(years, 0.5)
 
     return s
@@ -326,24 +394,36 @@ def run_monte_carlo_simulation(
     max_months: int = 36,
     step_months: int = 6,
     min_confidence: float = 55.0,
+    rates_outlook: dict | None = None,
 ):
+    """V10/V11: scenario drifts move the mortgage rate. V11.1 (pass `rates_outlook`): each path draws one
+    quantile u of the published mortgage-rate outlook and keeps it at every horizon, so each horizon's
+    simulated rates follow that horizon's p10-p90 band; the scenario follows u."""
     rng = np.random.default_rng(RANDOM_SEED)
     all_rows = []
     horizons = list(range(0, max_months + step_months, step_months))
+    bands = outlook_bands(rates_outlook, horizons) if rates_outlook is not None else None
 
     for market in model_data["market"].unique():
         hist = model_data[model_data["market"] == market].sort_index().copy()
         latest = hist.tail(1).iloc[0].copy()
 
         for sim in range(1, n_simulations + 1):
-            scenario = sample_scenario(rng)
+            if bands is not None:
+                u = float(rng.uniform())
+                scenario = scenario_from_quantile(u)
+            else:
+                scenario = sample_scenario(rng)
 
             for months in horizons:
                 confidence = 100 - (months / 6) * 6
                 if months > 0 and confidence < min_confidence:
                     continue
 
-                projected = project_random_state(latest, hist, scenario, months, rng)
+                rate = None
+                if bands is not None:
+                    rate = _num(latest.get("mortgage_30yr"), 0) if months == 0 else rate_at_quantile(bands[months], u)
+                projected = project_random_state(latest, hist, scenario, months, rng, mortgage_rate=rate)
 
                 pred_frame = pd.DataFrame([projected])
                 for f in features:
@@ -401,9 +481,13 @@ def run_monte_carlo_simulation(
             "entry_score_p10": group["projected_entry_score"].quantile(0.10),
             "entry_score_p90": group["projected_entry_score"].quantile(0.90),
             "growth_mean_pct": group["projected_12m_growth_pct"].mean(),
+            "growth_median_pct": group["projected_12m_growth_pct"].median(),
             "growth_p10_pct": group["projected_12m_growth_pct"].quantile(0.10),
             "growth_p90_pct": group["projected_12m_growth_pct"].quantile(0.90),
             "mortgage_mean": group["projected_mortgage_30yr"].mean(),
+            "mortgage_p10": group["projected_mortgage_30yr"].quantile(0.10),
+            "mortgage_p50": group["projected_mortgage_30yr"].quantile(0.50),
+            "mortgage_p90": group["projected_mortgage_30yr"].quantile(0.90),
             "payment_to_income_mean": group["projected_payment_to_income_ratio"].mean(),
             "prob_neutral_or_better": (group["signal_rank"] >= signal_rank("Neutral / Fair Value")).mean(),
             "prob_slight_buy_or_better": (group["signal_rank"] >= signal_rank("Slight Buy")).mean(),
@@ -443,7 +527,11 @@ def run_monte_carlo_simulation(
                 f"Best simulated window is {best['horizon_label']} with "
                 f"{best['prob_neutral_or_better']:.1%} probability of Neutral/Fair Value or better "
                 f"and {best['prob_slight_buy_or_better']:.1%} probability of Slight Buy or better."
+            ) if bands is None else (
+                f"Highest simulated Entry Score distribution at {best['horizon_label']} "
+                f"({best['prob_neutral_or_better']:.1%} of paths Neutral/Fair Value or better). {NOT_TIMING_ADVICE}"
             ),
+            "timing_advice": bands is None,
         })
 
     best_windows = pd.DataFrame(best_rows)
