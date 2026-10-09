@@ -20,6 +20,14 @@ still reproduces. Two things remain, and the contract states both:
   no back-filling they fail V10's 40%-missing feature rule. They still feed the Entry Score where they exist.
 Items 2–3 of the handoff list are superseded by the out-of-sample test.
 
+## Status (2026-10-09): V11.1 audit amendments
+The 2026-10-09 system audit found seven issues (stale rate in the scored quarter, a Monte Carlo that assumed
+falling rates, look-ahead from release lags, silent gaps, unreported staleness, a publish path that could
+mark a failed contract PASS, and housekeeping). V11.1 fixes them as labelled amendments; see
+`V11_RESULTS.md`, "V11.1 amendments". Still open: the Entry Score remains a description of buyer
+conditions, not a validated timing signal (calibration FAILS in both markets under V11.1 too), and the
+trigger sensitivities (4 score points per rate point, etc.) remain heuristics.
+
 ## Found in the migration review (2026-10-07)
 These were kept exactly as V10 behaves so the baseline reproduces. Each was fixed in V11 (above).
 

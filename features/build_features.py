@@ -95,6 +95,46 @@ def add_features(df: pd.DataFrame) -> pd.DataFrame:
     df["target_4q_growth"] = df["hpi"].shift(-4) / df["hpi"] - 1
     return df
 
+RATE_FEATURES = ("mortgage_30yr", "ten_year", "fed_funds", "mortgage_spread", "yield_curve", "mortgage_change_1q",
+                 "mortgage_change_4q", "ten_year_change_4q", "estimated_monthly_pi_payment",
+                 "payment_to_income_ratio", "payment_to_income_change_1yr")
+
+
+def apply_current_rates(df: pd.DataFrame, rates: dict) -> pd.DataFrame:
+    """V11.1 (audit finding 2): the scoring quarter is the newest one FHFA has published, months old by the
+    time the model runs, but a buyer faces today's rates. Overwrite the rate-family features of that one row
+    (never history or training rows) with the newest observations (`latest_rate_features()`), and the
+    payment-to-income figures derived from them. Changes are measured against the same series one quarter
+    and one year before the observation date."""
+    df = df.copy()
+    if df.empty:
+        return df
+    i = df.index[-1]
+    m, t, f = rates["mortgage_30yr"], rates["ten_year"], rates["fed_funds"]
+    df.loc[i, "mortgage_30yr"] = m["value"]
+    df.loc[i, "ten_year"] = t["value"]
+    df.loc[i, "fed_funds"] = f["value"]
+    df.loc[i, "mortgage_spread"] = m["value"] - t["value"]
+    df.loc[i, "yield_curve"] = t["value"] - f["value"]
+    if m.get("value_1q_earlier") is not None:
+        df.loc[i, "mortgage_change_1q"] = m["value"] - m["value_1q_earlier"]
+    if m.get("value_4q_earlier") is not None:
+        df.loc[i, "mortgage_change_4q"] = m["value"] - m["value_4q_earlier"]
+    if t.get("value_4q_earlier") is not None:
+        df.loc[i, "ten_year_change_4q"] = t["value"] - t["value_4q_earlier"]
+    if "estimated_home_price" in df.columns and pd.notna(df.at[i, "estimated_home_price"]):
+        df.loc[i, "estimated_monthly_pi_payment"] = float(mortgage_payment(pd.Series([df.at[i, "estimated_home_price"] * 0.80]),
+                                                                           pd.Series([m["value"]])).iloc[0])
+        if "median_household_income" in df.columns and pd.notna(df.at[i, "median_household_income"]):
+            df.loc[i, "payment_to_income_ratio"] = df.at[i, "estimated_monthly_pi_payment"] / (df.at[i, "median_household_income"] / 12)
+            if len(df) > 4 and "payment_to_income_ratio" in df.columns:
+                df.loc[i, "payment_to_income_change_1yr"] = df.at[i, "payment_to_income_ratio"] - df["payment_to_income_ratio"].iloc[-5]
+    df["rate_features_as_of"] = None
+    df["rate_features_as_of"] = df["rate_features_as_of"].astype(object)
+    df.loc[i, "rate_features_as_of"] = m["date"]
+    return df
+
+
 def get_features(df: pd.DataFrame) -> list[str]:
     candidates = [
         "hpi_qoq", "hpi_yoy", "hpi_3yr_growth", "hpi_5yr_growth",

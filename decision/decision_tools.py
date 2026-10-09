@@ -137,26 +137,41 @@ def trigger_engine(latest: pd.DataFrame) -> pd.DataFrame:
                 break
 
         needed = max(0, next_threshold - score)
+        rate_now = _num(row.get("mortgage_30yr"))
+        drop = needed / 4.0 if needed else 0
+        rate_as_of = row.get("rate_features_as_of")
+        rate_as_of = rate_as_of if isinstance(rate_as_of, str) and rate_as_of else None
+        if rate_now == rate_now:
+            rate_text = (f"a {drop:.2f} point mortgage-rate drop (from {rate_now:.2f}% "
+                         f"{'on ' + rate_as_of if rate_as_of else 'in the scored quarter'} to about {max(0.0, rate_now - drop):.2f}%)")
+        else:
+            rate_text = f"a {drop:.2f} point mortgage-rate drop"
         rows.append({
             "market": market,
             "current_entry_score": score,
             "current_signal": current_signal,
             "next_signal_target": next_signal,
             "points_needed": needed,
-            "mortgage_rate_drop_needed_estimate": needed / 4.0 if needed else 0,
+            "mortgage_rate_drop_needed_estimate": drop,
+            "mortgage_rate_now": rate_now,
+            "mortgage_rate_as_of": rate_as_of,
+            "mortgage_rate_target_estimate": max(0.0, rate_now - drop) if rate_now == rate_now else np.nan,
             "inventory_yoy_improvement_needed_estimate": needed / 12.0 if needed else 0,
             "payment_to_income_improvement_needed_estimate": needed / 120.0 if needed else 0,
             "appreciation_forecast_improvement_needed_estimate": needed / 160.0 if needed else 0,
             "plain_english": (
                 f"{market} needs about {needed:.1f} more entry-score points to reach {next_signal}. "
-                f"That could roughly come from a {needed/4.0:.2f} point mortgage-rate drop, "
+                f"That could roughly come from {rate_text}, "
                 f"a {needed/12.0:.1%} inventory-growth improvement, or a combination."
             )
         })
 
     return pd.DataFrame(rows)
 
-def monitoring_snapshot(latest: pd.DataFrame, output_dir) -> pd.DataFrame:
+def monitoring_snapshot(latest: pd.DataFrame, output_dir, model_version: str | None = None) -> pd.DataFrame:
+    """Compare this run with the previous one. Each snapshot row carries its model_version; changes are
+    computed only against a prior run of the same model version, so a model switch (V10 -> V11 -> V11.1)
+    is reported as such instead of as large market moves (audit finding 7)."""
     from pathlib import Path
     output_dir = Path(output_dir)
     current_path = output_dir / "v9_monitoring_current_snapshot.csv"
@@ -170,13 +185,21 @@ def monitoring_snapshot(latest: pd.DataFrame, output_dir) -> pd.DataFrame:
     cols = [c for c in cols if c in latest.columns]
     snapshot = latest[cols].copy()
     snapshot["run_timestamp"] = pd.Timestamp.now()
+    if model_version is not None:
+        snapshot["model_version"] = model_version
 
     if current_path.exists():
         prior = pd.read_csv(current_path)
+        if model_version is not None:
+            prior_version = prior["model_version"] if "model_version" in prior.columns else pd.Series("unknown", index=prior.index)
+            prior = prior.assign(model_version=prior_version.fillna("unknown").astype(str))
         compare = snapshot.merge(prior, on="market", how="left", suffixes=("", "_prior"))
+        same = (compare["model_version"] == compare["model_version_prior"]) if model_version is not None else pd.Series(True, index=compare.index)
         for metric in ["entry_score", "predicted_12m_growth_pct", "mortgage_30yr", "payment_to_income_ratio"]:
             if metric in compare.columns and f"{metric}_prior" in compare.columns:
-                compare[f"{metric}_change_since_last_run"] = compare[metric] - compare[f"{metric}_prior"]
+                compare[f"{metric}_change_since_last_run"] = (compare[metric] - compare[f"{metric}_prior"]).where(same)
+        if model_version is not None:
+            compare["comparable_with_prior_run"] = same & compare["model_version_prior"].notna()
     else:
         compare = snapshot.copy()
 

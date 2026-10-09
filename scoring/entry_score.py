@@ -77,6 +77,27 @@ def add_entry_scores(data: pd.DataFrame, point_in_time: bool | None = None) -> p
 
     return data
 
+SCORE_INPUTS = (
+    "predicted_12m_growth", "hpi_yoy", "hpi_5yr_growth", "composite_listing_price_yoy", "zillow_zhvi_yoy",
+    "realtor_listing_price_yoy", "months_supply", "composite_active_listings_yoy", "realtor_active_listings_yoy",
+    "realtor_dom_change_1yr", "composite_county_permits_yoy", "metro_unemployment", "metro_payroll_growth_yoy",
+    "metro_labor_force_growth_yoy", "mortgage_30yr", "mortgage_change_4q", "mortgage_spread",
+    "payment_to_income_ratio", "payment_to_income_change_1yr", "hpi_volatility_2yr",
+    "metro_unemployment_change_1yr", "realtor_price_reduction_change_1yr",
+)
+
+
+def neutral_inputs(latest: pd.DataFrame) -> dict[str, list[str]]:
+    """Audit finding 5: Entry Score inputs that were absent or missing in each market's scored quarter and so
+    scored a neutral 50. Published in the contract's warnings instead of passing silently."""
+    out = {}
+    for _, row in latest.iterrows():
+        missing = [c for c in SCORE_INPUTS if c not in row.index or pd.isna(row[c])]
+        if missing:
+            out[str(row["market"])] = missing
+    return out
+
+
 def signal_strength(score: float) -> str:
     if score >= 85: return "Strong Buy"
     if score >= 72: return "Buy"

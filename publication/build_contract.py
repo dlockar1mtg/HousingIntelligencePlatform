@@ -13,7 +13,8 @@ from pathlib import Path
 
 import pandas as pd
 
-CONTRACT_VERSION = "1.2.0"          # 1.1: V11, out-of-sample calibration, walk_forward; 1.2: rates_outlook
+CONTRACT_VERSION = "1.3.0"          # 1.1: V11, out-of-sample calibration, walk_forward; 1.2: rates_outlook;
+                                    # 1.3: V11.1 audit amendments (rate_features_as_of, data_ages, no timing advice)
 STALE_AFTER_MONTHS = 6
 KNOWN_ISSUES = {
     "V10": [
@@ -28,8 +29,14 @@ KNOWN_ISSUES = {
         "ENTRY_SCORE_IS_NOT_A_VALIDATED_TIMING_SIGNAL",
         "SHORT_HISTORY_LAYERS_LEFT_OUT_OF_THE_MODEL",
     ],
+    # V11.1 fixes the 2026-10-09 audit findings (docs/V11_RESULTS.md, "V11.1 amendments"); V11's stated issues remain.
+    "V11.1": [
+        "ENTRY_SCORE_IS_NOT_A_VALIDATED_TIMING_SIGNAL",
+        "SHORT_HISTORY_LAYERS_LEFT_OUT_OF_THE_MODEL",
+    ],
 }
-WALK_FORWARD_GAP_QUARTERS = {"V10": 0, "V11": 3}
+WALK_FORWARD_GAP_QUARTERS = {"V10": 0, "V11": 3, "V11.1": 3}
+NO_TIMING_ADVICE_VERSIONS = {"V11.1"}
 
 
 def _clean(value):
@@ -83,8 +90,24 @@ def build_contract(outputs: Path, *, source_commit: str, run_id: str | None = No
     alerts = _read(outputs, "v10_alerts.csv")
     freshness = _read(outputs, "v10_data_freshness_report.csv")
     backtest = _read(outputs, "v10_walk_forward_backtest.csv")
+    quality_path = outputs / "data_quality.json"
+    quality = json.loads(quality_path.read_text(encoding="utf-8")) if quality_path.exists() else {}
+    amended = model_version in NO_TIMING_ADVICE_VERSIONS
 
     data_dates = {str(r["dataset"]): _clean(r.get("latest_observation")) for _, r in freshness.iterrows()} if not freshness.empty else {}
+    market_file_dates = dict(data_dates)
+    if amended:
+        from validation.freshness import assess, census_latest, warnings_for
+        census = census_latest(outputs.parent / "inputs" / "census_income.csv") if (outputs.parent / "inputs").exists() else None
+        if census:
+            market_file_dates["Census ACS income"] = census
+        data_dates = {**market_file_dates, **{f"FRED {k}": v for k, v in (quality.get("fred_observations") or {}).items()}}
+        run_day = date.fromisoformat((generated_at or datetime.now(timezone.utc).isoformat())[:10])
+        file_ages = assess(market_file_dates, run_day)
+        data_ages = file_ages + [r for r in quality.get("fred_freshness") or []]
+        stale_files = warnings_for(file_ages)
+    else:
+        data_ages, stale_files = None, []
     latest_input = max((d for d in data_dates.values() if d), default=None)
     markets = []
     for market in latest.index:
@@ -117,10 +140,18 @@ def build_contract(outputs: Path, *, source_commit: str, run_id: str | None = No
                              "direction_accuracy": _clean(round(float(bt["direction_correct"].mean()), 3)) if "direction_correct" in bt else None}
                             if len(bt) else None,
             "mortgage_30yr": _clean(round(float(row["mortgage_30yr"]), 3)),
+            **({"rate_features_as_of": _clean(row.get("rate_features_as_of"))} if amended else {}),
             "zillow_zhvi": _clean(round(float(row["zillow_zhvi"]), 0)) if "zillow_zhvi" in row else None,
             "payment_to_income_ratio": _clean(round(float(row["payment_to_income_ratio"]), 4)) if "payment_to_income_ratio" in row else None,
             "calibration": _calibration(cal),
-            "best_window": None if bw is None else {"months": int(bw["best_entry_window_months"]),
+            # V11.1: no timing advice. The UIP shows best_window as "Best window"; it is null, and the
+            # simulated peak is published under a name and note that say what it is.
+            **({"simulated_score_peak": None if bw is None else {
+                "months": int(bw["best_entry_window_months"]), "expected_entry_score": round(float(bw["best_expected_entry_score"]), 3),
+                "prob_neutral_or_better": float(bw["prob_neutral_or_better"]), "timing_advice": False,
+                "note": "Scenario output, not timing advice: the Entry Score failed its out-of-sample timing test."}}
+               if amended else {}),
+            "best_window": None if (bw is None or amended) else {"months": int(bw["best_entry_window_months"]),
                                                     "expected_entry_score": round(float(bw["best_expected_entry_score"]), 3),
                                                     "prob_neutral_or_better": float(bw["prob_neutral_or_better"]),
                                                     "prob_slight_buy_or_better": float(bw["prob_slight_buy_or_better"])},
@@ -128,9 +159,15 @@ def build_contract(outputs: Path, *, source_commit: str, run_id: str | None = No
                          "entry_score_p10": round(float(r["entry_score_p10"]), 2), "entry_score_p90": round(float(r["entry_score_p90"]), 2),
                          "growth_p10": round(float(r["growth_p10_pct"]) / 100, 5), "growth_mean": round(float(r["growth_mean_pct"]) / 100, 5),
                          "growth_p90": round(float(r["growth_p90_pct"]) / 100, 5), "mortgage_mean": round(float(r["mortgage_mean"]), 3),
+                         **({"growth_median": round(float(r["growth_median_pct"]) / 100, 5),
+                             "mortgage_p10": round(float(r["mortgage_p10"]), 3), "mortgage_p50": round(float(r["mortgage_p50"]), 3),
+                             "mortgage_p90": round(float(r["mortgage_p90"]), 3)} if amended and "mortgage_p50" in r else {}),
                          "prob_neutral_or_better": float(r["prob_neutral_or_better"])} for _, r in path.iterrows()],
             "trigger": None if tr is None else {"next_signal": str(tr["next_signal_target"]), "points_needed": round(float(tr["points_needed"]), 2),
                                                 "mortgage_rate_drop_needed": round(float(tr["mortgage_rate_drop_needed_estimate"]), 2),
+                                                **({"mortgage_rate_now": _clean(round(float(tr["mortgage_rate_now"]), 3)),
+                                                    "mortgage_rate_as_of": _clean(tr.get("mortgage_rate_as_of"))}
+                                                   if amended and "mortgage_rate_now" in tr else {}),
                                                 "plain_english": str(tr["plain_english"]), "heuristic": True},
             "alerts": [{"severity": str(a["severity"]), "type": str(a["alert_type"]), "message": str(a["message"])}
                        for _, a in alerts[alerts["market"] == market].iterrows()] if not alerts.empty else [],
@@ -149,7 +186,9 @@ def build_contract(outputs: Path, *, source_commit: str, run_id: str | None = No
         "latest_input_observation": latest_input,
         "markets": markets,
         "known_issues": KNOWN_ISSUES.get(model_version, KNOWN_ISSUES["V10"]),
-        "warnings": ([f"MARKET_STATE_OLDER_THAN_{STALE_AFTER_MONTHS}_MONTHS: {', '.join(stale)}"] if stale else []),
+        "warnings": ([f"MARKET_STATE_OLDER_THAN_{STALE_AFTER_MONTHS}_MONTHS: {', '.join(stale)}"] if stale else [])
+                    + (list(quality.get("warnings") or []) + stale_files if amended else []),
+        **({"data_ages": data_ages, "rate_features_as_of": quality.get("rate_features_as_of")} if amended else {}),
         "rates_outlook": _rates(outputs),
         "household": None,
         "automatic_execution_authorized": False,
@@ -172,10 +211,34 @@ def _rates(outputs: Path) -> dict | None:
 
 
 def write_package(directory: Path, contract: dict) -> dict:
-    """The contract plus a manifest with its digest, the shape the UIP's other domain packages use."""
+    """The contract plus a manifest with its digest, the shape the UIP's other domain packages use.
+
+    Audit finding 1: the manifest says validation_status PASS, so nothing is written until the contract has
+    passed validation. The package is built in a temporary directory beside the target, validated again as
+    a package, and only then moved into place. An invalid contract raises ContractError and leaves no package.
+    """
+    import shutil
+    import tempfile
+    from publication.validate_contract import validate_contract, validate_package
+
     directory = Path(directory)
-    directory.mkdir(parents=True, exist_ok=True)
-    text = json.dumps(contract, indent=1, sort_keys=False) + "\n"
+    validate_contract(contract)
+    directory.parent.mkdir(parents=True, exist_ok=True)
+    tmp = Path(tempfile.mkdtemp(prefix=f".{directory.name}.", dir=directory.parent))
+    try:
+        manifest = _write_files(tmp, contract)
+        validate_package(tmp)
+        if directory.exists():
+            shutil.rmtree(directory)
+        tmp.replace(directory)
+    except BaseException:
+        shutil.rmtree(tmp, ignore_errors=True)
+        raise
+    return manifest
+
+
+def _write_files(directory: Path, contract: dict) -> dict:
+    text = json.dumps(contract, indent=1, sort_keys=False, allow_nan=False) + "\n"
     (directory / "housing_uip_contract.json").write_text(text, encoding="utf-8")
     digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
     manifest = {"package_id": f"housing-{contract['generated_at_utc'][:10]}-{digest[:12]}", "domain": "housing",
