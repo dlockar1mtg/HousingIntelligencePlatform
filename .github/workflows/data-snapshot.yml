@@ -8,6 +8,10 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+env:
+  # Install the exact versions in requirements-lock.txt (see that file); Dependabot proposes updates monthly.
+  PIP_CONSTRAINT: requirements-lock.txt
+
 jobs:
   snapshot:
     runs-on: ubuntu-24.04
