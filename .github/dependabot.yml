@@ -15,6 +15,12 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      # This repository runs on Python 3.11; numpy 2.5+ and scipy 1.18+ need Python 3.12.
+      # Remove these two lines when the workflows move to a newer Python.
+      - dependency-name: "numpy"
+        versions: [">=2.5"]
+      - dependency-name: "scipy"
+        versions: [">=1.18"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
