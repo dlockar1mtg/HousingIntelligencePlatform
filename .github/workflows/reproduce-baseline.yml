@@ -28,8 +28,8 @@ jobs:
     env:
       HOUSING_MODEL_VERSION: V10      # the baseline is V10; production runs V11 (config/settings.json)
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
           cache: pip
@@ -60,7 +60,7 @@ jobs:
           print("::notice title=Gate::" + ("same decision state as the V10 baseline" if ok else "decision state differs from the V10 baseline"))
           sys.exit(0 if ok else 1)
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: v10-reproduction-${{ github.run_id }}
@@ -80,8 +80,8 @@ jobs:
     env:
       HOUSING_MODEL_VERSION: V11.1
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
           cache: pip
@@ -103,7 +103,7 @@ jobs:
               print(f"::notice title={m['market']} {c['model_version']}::{m['market_state_as_of']} score {m['entry_score']} {m['signal']} at {m['mortgage_30yr']}% ({m.get('rate_features_as_of')}) | next 12m {m['predicted_12m_growth']:+.2%} | walk-forward MAE {wf.get('mae')} over {wf.get('quarters')} quarters | timing test {cal['status']} rank {cal.get('rank_correlation')} over {cal.get('quarters')} quarters")
           print(f"::notice title=Contract::{c['contract_version']} {c['model_version']} known issues {c['known_issues']} warnings {c['warnings']}")
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: v11-check-${{ github.run_id }}

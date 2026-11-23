@@ -23,7 +23,7 @@ jobs:
       run:
         shell: bash          # explicit bash runs with -o pipefail, so `cmd | tee log` fails when cmd fails
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Skip a backup run when this week's run already published
         id: gate
         run: |
@@ -32,7 +32,7 @@ jobs:
             if [ "$(( ($(date -u +%s) - $(date -u -d "$last" +%s)) / 86400 ))" -lt 2 ]; then echo "run=false" >> "$GITHUB_OUTPUT"; echo "::notice::published $last; backup run skipped"; exit 0; fi
           fi
           echo "run=true" >> "$GITHUB_OUTPUT"
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         if: steps.gate.outputs.run == 'true'
         with:
           python-version: "3.11"
@@ -41,7 +41,7 @@ jobs:
         run: pip install -r requirements-dev.txt && python -m pytest -q
       - name: Restore the market files
         if: steps.gate.outputs.run == 'true'
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: |
             inputs/zhvi_metro.csv
@@ -87,13 +87,13 @@ jobs:
       - name: Build and validate the UIP contract
         if: steps.gate.outputs.run == 'true'
         run: python publish_uip.py --package uip-package | tee publish.log && echo "::notice title=Housing contract::$(tail -1 publish.log | cut -c1-400)"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: steps.gate.outputs.run == 'true'
         with:
           name: housing-production-${{ github.run_id }}
           path: uip-package/
           retention-days: 14
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always() && steps.gate.outputs.run == 'true'
         with:
           name: housing-run-outputs-${{ github.run_id }}
@@ -103,7 +103,7 @@ jobs:
           retention-days: 14
       - name: Save the market files
         if: steps.gate.outputs.run == 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: |
             inputs/zhvi_metro.csv
