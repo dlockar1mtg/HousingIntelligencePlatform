@@ -10,6 +10,11 @@ updates:
     groups:
       python-packages:
         patterns: ["*"]
+    # Python major versions (pandas 3, DuckDB 2, yfinance 1, ...) can change behavior the tests
+    # do not cover, so they are never proposed here; take each one on deliberately.
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
