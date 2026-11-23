@@ -1,0 +1,25 @@
+# Monthly, one grouped pull request per ecosystem. The repository's tests run on each one;
+# merge when they pass. Python versions live in requirements-lock.txt (applied via PIP_CONSTRAINT).
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 2
+    groups:
+      python-packages:
+        patterns: ["*"]
+    # Python major versions (pandas 3, DuckDB 2, yfinance 1, ...) can change behavior the tests
+    # do not cover, so they are never proposed here; take each one on deliberately.
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 2
+    groups:
+      github-actions:
+        patterns: ["*"]

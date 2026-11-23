@@ -13,6 +13,10 @@ permissions:
 concurrency:
   group: reproduce-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
+env:
+  # Install the exact versions in requirements-lock.txt (see that file); Dependabot proposes updates monthly.
+  PIP_CONSTRAINT: requirements-lock.txt
+
 jobs:
   reproduce:
     if: github.event_name != 'pull_request' || github.event.label.name == 'reproduce'

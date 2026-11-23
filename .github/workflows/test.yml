@@ -5,6 +5,10 @@ on:
   pull_request:
 permissions:
   contents: read
+env:
+  # Install the exact versions in requirements-lock.txt (see that file); Dependabot proposes updates monthly.
+  PIP_CONSTRAINT: requirements-lock.txt
+
 jobs:
   test:
     runs-on: ubuntu-24.04
